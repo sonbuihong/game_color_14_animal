@@ -335,7 +335,7 @@ export default class Scene1 extends Phaser.Scene {
             console.log('WIN!');
             AudioManager.play('sfx-correct_s2');
             this.time.delayedCall(GameConstants.SCENE2.TIMING.WIN_DELAY, () =>
-                this.scene.start(SceneKeys.Scene2)
+                this.scene.start(SceneKeys.Preload2)
             );
         }
         

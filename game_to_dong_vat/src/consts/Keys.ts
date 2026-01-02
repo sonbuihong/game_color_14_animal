@@ -3,6 +3,7 @@
 // 1. Tên các Màn chơi (Scene)
 export enum SceneKeys {
     Preload = 'PreloadScene',
+    Preload2 = 'PreloadScene2',
     Scene1 = 'Scene1',
     Scene2 = 'Scene2',
     EndGame = 'EndGameScene',
