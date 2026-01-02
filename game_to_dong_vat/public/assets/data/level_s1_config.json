@@ -1,15 +1,15 @@
 {
   "teacher": {
-    "baseScale": 0.7,
+    "baseScale": 0.8,
     "outlineKey": "hama_outline",
     "baseX_pct": 0.55, 
-    "baseY_pct": 0.55,
+    "baseY_pct": 0.5,
     "parts": [
-      { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.7, "hintX": 0, "hintY": 0 },
-      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.7, "hintX": 0, "hintY": 0 },
-      { "key": "hama3", "offsetX": 0, "offsetY": 0, "scale": 0.7, "hintX": 0, "hintY": 0 },
-      { "key": "hama4", "offsetX": 0, "offsetY": 0, "scale": 0.7, "hintX": 0, "hintY": 0 },
-      { "key": "hama5", "offsetX": 0, "offsetY": 0, "scale": 0.7, "hintX": 0, "hintY": 0 }
+      { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.8},
+      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.8},
+      { "key": "hama3", "offsetX": 0, "offsetY": 0, "scale": 0.8},
+      { "key": "hama4", "offsetX": 0, "offsetY": 0, "scale": 0.8},
+      { "key": "hama5", "offsetX": 0, "offsetY": 0, "scale": 0.8}
     ]
   },
   "letter": {

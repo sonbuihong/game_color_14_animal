@@ -43,10 +43,6 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     // Tween đang chạy cho gợi ý (lưu lại để stop khi cần)
-
-
-
-    // Tween đang chạy cho gợi ý (lưu lại để stop khi cần)
     private activeHintTween: Phaser.Tweens.Tween | null = null;
 
     constructor() {
@@ -66,13 +62,9 @@ export default class Scene1 extends Phaser.Scene {
     create() {
         showGameButtons();
         
-
-
         this.setupSystem(); // Cài đặt hệ thống (Paint, Idle)
         this.setupBackgroundAndAudio(); // Cài đặt hình nền và nhạc nền
         this.createUI(); // Tạo giao diện (Bảng màu, Banner)
-        
-
         
         // Chạy UI Scene
         this.scene.launch(SceneKeys.UI, { 
