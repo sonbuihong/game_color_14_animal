@@ -2,7 +2,7 @@
   "teacher": {
     "baseScale": 0.8,
     "outlineKey": "ca_sau_outline",
-    "baseX_pct": 0.55, 
+    "baseX_pct": 0.5, 
     "baseY_pct": 0.55,
     "parts": [
       { "key": "ca_sau_1", "offsetX": 0, "offsetY": 0, "scale": 0.8 },
