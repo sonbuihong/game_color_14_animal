@@ -158,7 +158,7 @@ export default class Scene1 extends Phaser.Scene {
         // Khởi tạo và phát nhạc nền mới
         this.bgm = this.sound.add(AudioKeys.BgmNen, {
             loop: true,
-            volume: 0.5,
+            volume: 1,
         });
         this.bgm.play();
     }
