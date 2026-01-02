@@ -512,7 +512,8 @@ export default class Scene1 extends Phaser.Scene {
         const destY = target.y + (hY * originScale);
 
         if (!this.handHint) return;
-        this.handHint.setPosition(destX + IDLE_CFG.OFFSET_X, destY + IDLE_CFG.OFFSET_Y).setAlpha(0).setScale(0.7);
+        this.handHint.setPosition(destX + IDLE_CFG.OFFSET_X, destY + IDLE_CFG.OFFSET_Y)
+            .setAlpha(0).setScale(0.7);
         
         this.tweens.chain({
             targets: this.handHint,
