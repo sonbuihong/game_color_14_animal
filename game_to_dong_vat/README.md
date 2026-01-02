@@ -1,6 +1,6 @@
-# 🌈 Game giải đố và tô màu cho bé các động vật hoang dã 
+# 🌈 Game tô màu cho bé các động vật hoang dã 
 
-**Game giáo dục cho trẻ 3-4 tuổi, giúp rèn kỹ năng nhận diện đồ vật, số và màu sắc thông qua các màn chơi tương tác, trực quan bằng Phaser 3 + TypeScript.**
+**Game giáo dục cho trẻ 3-4 tuổi, giúp rèn kỹ năng nhận diện các động vật thông qua các màn chơi tương tác, trực quan bằng Phaser 3 + TypeScript.**
 
 ---
 
@@ -43,7 +43,7 @@
 - **Tương tác UI**:
   - `btn-reset`: dừng âm thanh, reset music + restart `Scene1`.  
   - `btn-exit`: khi chạy trong host (Iruka), gọi `host.complete()` kèm trạng thái.  
-- **Flow**: Preload → Scene1 (tô màu) → Scene2 (tô màu) → EndGame.
+- **Flow**: Preload → Scene1 (tô màu con hà mã) → Scene2 (tô màu tô màu con cá sấu) → EndGame.
 
 ---
 
