@@ -1,0 +1,29 @@
+{
+  "teacher": {
+    "baseScale": 0.8,
+    "outlineKey": "ca_sau_outline",
+    "baseX_pct": 0.55, 
+    "baseY_pct": 0.55,
+    "parts": [
+      { "key": "ca_sau_1", "offsetX": 0, "offsetY": 0, "scale": 0.8 },
+      { "key": "ca_sau_2", "offsetX": 0, "offsetY": 0, "scale": 0.8 },
+      { "key": "ca_sau_3", "offsetX": 0, "offsetY": 0, "scale": 0.8 },
+      { "key": "ca_sau_4", "offsetX": 0, "offsetY": 0, "scale": 0.8 }
+    ]
+  },
+  "letter": {
+    "baseScale": 0.6,
+    "outlineKey": "ca_sau_template",
+    "frameKey": "ca_sau_frame", 
+    "baseX_pct": 0.75,
+    "baseY_pct": 0.25,
+    "parts": []
+  },
+  "name": {
+    "baseScale": 0.6,
+    "outlineKey": "ca_sau_name",
+    "baseX_pct": 0.22,
+    "baseY_pct": 0.2,
+    "parts": []
+  }
+}
