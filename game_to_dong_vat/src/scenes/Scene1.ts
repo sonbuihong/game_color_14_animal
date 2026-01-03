@@ -24,7 +24,6 @@ export default class Scene1 extends Phaser.Scene {
     private paintManager!: PaintManager; // Quản lý việc tô màu, cọ vẽ, canvas
     private idleManager!: IdleManager; // Quản lý thời gian rảnh để hiện gợi ý
 
-
     // --- QUẢN LÝ TRẠNG THÁI GAME (GAME STATE) ---
     // Map lưu các bộ phận chưa tô xong (Key: ID, Value: Image Object) -> Dùng để random gợi ý
     private unfinishedPartsMap: Map<string, Phaser.GameObjects.Image> =
@@ -35,7 +34,7 @@ export default class Scene1 extends Phaser.Scene {
     private isIntroActive: boolean = false; // Cờ chặn tương tác khi đang chạy intro
 
     // --- UI COMPONENTS ---
-    // private handHint!: Phaser.GameObjects.Image; // Đã xóa thuộc tính cục bộ
+    private fpsText!: Phaser.GameObjects.Text;
     
     private get handHint(): Phaser.GameObjects.Image | undefined {
          const uiScene = this.scene.get(SceneKeys.UI) as any;
@@ -44,6 +43,7 @@ export default class Scene1 extends Phaser.Scene {
 
     // Tween đang chạy cho gợi ý (lưu lại để stop khi cần)
     private activeHintTween: Phaser.Tweens.Tween | null = null;
+    private activeHintTarget: Phaser.GameObjects.Image | null = null;
 
     constructor() {
         super(SceneKeys.Scene1);
@@ -60,6 +60,7 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     create() {
+        document.title = "Game Tô Màu Con Hà Mã";
         showGameButtons();
         
         this.setupSystem(); // Cài đặt hệ thống (Paint, Idle)
@@ -83,6 +84,13 @@ export default class Scene1 extends Phaser.Scene {
             this.idleManager.reset();
             if (this.input.keyboard) this.input.keyboard.enabled = true;
         });
+
+        // Tạo một dòng text để hiển thị FPS ở góc trái trên
+        this.fpsText = this.add.text(10, 10, 'FPS: 0', {
+            font: '16px Arial',
+            color: '#00ff00',
+            backgroundColor: '#000000'
+        }).setScrollFactor(0).setDepth(100);
     }
 
     update(time: number, delta: number) {
@@ -97,6 +105,12 @@ export default class Scene1 extends Phaser.Scene {
         ) {
             this.idleManager.update(delta);
         }
+
+        // Lấy FPS thực tế và làm tròn số
+        const fps = Math.floor(this.game.loop.actualFps);
+        
+        // Cập nhật nội dung text
+        this.fpsText.setText('FPS: ' + fps);
     }
 
     shutdown() {
@@ -129,8 +143,6 @@ export default class Scene1 extends Phaser.Scene {
         );
     }
 
-
-
     private setupInput() {
         // Chuyển tiếp các sự kiện input sang cho PaintManager xử lý vẽ
         this.input.on('pointermove', (p: Phaser.Input.Pointer) =>
@@ -142,6 +154,7 @@ export default class Scene1 extends Phaser.Scene {
         this.input.on('pointerdown', () => {
             this.idleManager.reset();
             this.stopIntro();
+            this.stopActiveHint();
         });
     }
 
@@ -400,13 +413,19 @@ export default class Scene1 extends Phaser.Scene {
 
         // 2. Visual: Nhấp nháy bộ phận đó (nếu có) để gây chú ý
         if (target) {
+            this.activeHintTarget = target;
             this.tweens.add({
                 targets: target, 
                 alpha: { from: 0.01, to: 0.8 },
                 scale: { from: target.getData('originScale'), to: target.getData('originScale') * 1.005 },
                 duration: GameConstants.IDLE.FADE_IN, 
                 yoyo: true, 
-                repeat: 2
+                repeat: 2,
+                onComplete: () => {
+                    if (this.activeHintTarget === target) {
+                         this.activeHintTarget = null;
+                    }
+                }
             });
         }
 
@@ -478,6 +497,7 @@ export default class Scene1 extends Phaser.Scene {
         const IDLE_CFG = GameConstants.IDLE;
 
         // Visual 1: Nhấp nháy bộ phận đó
+        this.activeHintTarget = target;
         this.activeHintTween = this.tweens.add({
             targets: target, 
             alpha: { from: 0.01, to: 0.8 },
@@ -487,6 +507,7 @@ export default class Scene1 extends Phaser.Scene {
             repeat: 2,
             onComplete: () => { 
                 this.activeHintTween = null; 
+                this.activeHintTarget = null;
                 this.idleManager.reset(); 
             }
         });
@@ -515,5 +536,24 @@ export default class Scene1 extends Phaser.Scene {
                 { alpha: 0, duration: IDLE_CFG.FADE_OUT }
             ]
         });
+    }
+
+    private stopActiveHint() {
+        if (this.activeHintTween) {
+            this.activeHintTween.stop();
+            this.activeHintTween = null;
+        }
+
+        if (this.activeHintTarget) {
+            this.tweens.killTweensOf(this.activeHintTarget);
+            this.activeHintTarget.setAlpha(0.01); // Reset about PaintManager default alpha
+            this.activeHintTarget.setScale(this.activeHintTarget.getData('originScale'));
+            this.activeHintTarget = null;
+        }
+
+        if (this.handHint) {
+            this.tweens.killTweensOf(this.handHint);
+            this.handHint.setAlpha(0).setPosition(-200, -200);
+        }
     }
 }

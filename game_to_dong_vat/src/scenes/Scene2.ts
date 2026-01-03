@@ -42,6 +42,7 @@ export default class Scene2 extends Phaser.Scene {
 
     // Tween đang chạy cho gợi ý (lưu lại để stop khi cần)
     private activeHintTween: Phaser.Tweens.Tween | null = null;
+    private activeHintTarget: Phaser.GameObjects.Image | null = null;
 
     constructor() {
         super(SceneKeys.Scene2);
@@ -139,6 +140,7 @@ export default class Scene2 extends Phaser.Scene {
         this.input.on('pointerdown', () => {
             this.idleManager.reset();
             this.stopIntro();
+            this.stopActiveHint();
         });
     }
 
@@ -394,13 +396,19 @@ export default class Scene2 extends Phaser.Scene {
 
         // 2. Visual: Nhấp nháy bộ phận đó (nếu có) để gây chú ý
         if (target) {
+            this.activeHintTarget = target;
             this.tweens.add({
                 targets: target, 
                 alpha: { from: 0.01, to: 0.8 },
                 scale: { from: target.getData('originScale'), to: target.getData('originScale') * 1.005 },
                 duration: GameConstants.IDLE.FADE_IN, 
                 yoyo: true, 
-                repeat: 2
+                repeat: 2,
+                onComplete: () => {
+                    if(this.activeHintTarget === target){
+                        this.activeHintTarget = null;
+                    }
+                }
             });
         }
 
@@ -472,6 +480,7 @@ export default class Scene2 extends Phaser.Scene {
         const IDLE_CFG = GameConstants.IDLE;
 
         // Visual 1: Nhấp nháy bộ phận đó
+        this.activeHintTarget = target;
         this.activeHintTween = this.tweens.add({
             targets: target, 
             alpha: { from: 0.01, to: 0.8 },
@@ -481,7 +490,8 @@ export default class Scene2 extends Phaser.Scene {
             repeat: 2,
             onComplete: () => { 
                 this.activeHintTween = null; 
-                this.idleManager.reset(); 
+                this.activeHintTarget = null;
+                this.idleManager.reset();
             }
         });
 
@@ -508,5 +518,24 @@ export default class Scene2 extends Phaser.Scene {
                 { alpha: 0, duration: IDLE_CFG.FADE_OUT }
             ]
         });
+    }
+
+    private stopActiveHint() {
+        if (this.activeHintTween) {
+            this.activeHintTween.stop();
+            this.activeHintTween = null;
+        }
+
+        if (this.activeHintTarget) {
+            this.tweens.killTweensOf(this.activeHintTarget);
+            this.activeHintTarget.setAlpha(0.01); // Reset about PaintManager default alpha
+            this.activeHintTarget.setScale(this.activeHintTarget.getData('originScale'));
+            this.activeHintTarget = null;
+        }
+
+        if (this.handHint) {
+            this.tweens.killTweensOf(this.handHint);
+            this.handHint.setAlpha(0).setPosition(-200, -200);
+        }
     }
 }

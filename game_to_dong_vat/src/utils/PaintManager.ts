@@ -87,6 +87,8 @@ export class PaintManager {
         rt.setData('isFinished', false);
         if (this.ignoreCameraId) rt.cameraFilter = this.ignoreCameraId;
 
+        //tắt mark
+        
         // ✅ LOGIC MÀU: Tạo hitArea với opacity thấp để dễ nhìn
         const hitArea = this.scene.add.image(x, y, key).setScale(scale).setAlpha(0.01).setDepth(50);
         hitArea.setInteractive({ useHandCursor: true, pixelPerfect: true });

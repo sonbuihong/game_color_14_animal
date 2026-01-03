@@ -10,18 +10,18 @@ export default class PreloadScene2 extends Phaser.Scene {
         // console.log("Cleanup Scene 1");
         // this.textures.remove(TextureKeys.S1_Banner);
         // this.textures.remove(TextureKeys.S1_BannerText);
-        this.textures.remove(TextureKeys.S1_Board);
+        // this.textures.remove(TextureKeys.S1_Board);
         
         // Xóa bộ phận Hà Mã (Chắc chắn không dùng ở Scene 2)
-        this.textures.remove(TextureKeys.S1_Hama_Template);
-        this.textures.remove(TextureKeys.S1_Hama_Frame);
-        this.textures.remove(TextureKeys.S1_Hama_Name);
-        this.textures.remove(TextureKeys.S1_Hama_Outline);
-        this.textures.remove(TextureKeys.S1_Hama_1);
-        this.textures.remove(TextureKeys.S1_Hama_2);
-        this.textures.remove(TextureKeys.S1_Hama_3);
-        this.textures.remove(TextureKeys.S1_Hama_4);
-        this.textures.remove(TextureKeys.S1_Hama_5);
+        // this.textures.remove(TextureKeys.S1_Hama_Template);
+        // this.textures.remove(TextureKeys.S1_Hama_Frame);
+        // this.textures.remove(TextureKeys.S1_Hama_Name);
+        // this.textures.remove(TextureKeys.S1_Hama_Outline);
+        // this.textures.remove(TextureKeys.S1_Hama_1);
+        // this.textures.remove(TextureKeys.S1_Hama_2);
+        // this.textures.remove(TextureKeys.S1_Hama_3);
+        // this.textures.remove(TextureKeys.S1_Hama_4);
+        // this.textures.remove(TextureKeys.S1_Hama_5);
     }
 
     preload() {

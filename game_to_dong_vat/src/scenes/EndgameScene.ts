@@ -84,7 +84,7 @@ export default class EndGameScene extends Phaser.Scene {
             AudioManager.play('sfx-click');
             this.stopConfetti(); //
             showGameButtons();
-            this.scene.start('Scene1');
+            this.scene.start('PreloadScene');
         });
 
         // 4. Nút Exit
