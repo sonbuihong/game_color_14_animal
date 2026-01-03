@@ -146,7 +146,7 @@ export default class Scene2 extends Phaser.Scene {
      * Cài đặt hình nền và nhạc nền
      */
     private setupBackgroundAndAudio() {
-        changeBackground('assets/images/bg/background_game.jpg');
+        changeBackground('assets/images/bg/background_S2.jpg');
 
         // Dừng nhạc nền cũ nếu có (tránh chồng nhạc)
         if (this.sound.get(AudioKeys.BgmNen)) {
@@ -179,7 +179,7 @@ export default class Scene2 extends Phaser.Scene {
             .setDepth(0);
 
         const bottom_board = this.add
-            .image(cx, boardY + board.displayHeight - 200, TextureKeys.S1_BoardBottom)
+            .image(cx, boardY + board.displayHeight - 200, TextureKeys.BoardBottom)
             .setOrigin(0.5, 0)
             .setScale(0.72)
             .setDepth(10);

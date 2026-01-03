@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import Scene1 from './scenes/Scene1';
 import Scene2 from './scenes/Scene2';
 import PreloadScene from './scenes/PreloadScene';
+import PreloadScene1 from './scenes/PreloadScene1';
 import PreloadScene2 from './scenes/PreloadScene2';
 import UIScene from './scenes/UIScene';
 
@@ -23,7 +24,7 @@ import AudioManager from './audio/AudioManager';
         width: 1920,
         height: 1080,
         parent: 'game-container',
-        scene: [PreloadScene, PreloadScene2, Scene1, Scene2, EndGameScene, UIScene],
+        scene: [PreloadScene, PreloadScene1, PreloadScene2, Scene1, Scene2, EndGameScene, UIScene],
         backgroundColor: '#ffffff',
         scale: {
             mode: Phaser.Scale.FIT,       // Dùng FIT để co giãn giữ tỉ lệ
@@ -42,15 +43,14 @@ import AudioManager from './audio/AudioManager';
 
     // --- 2. XỬ LÝ LOGIC UI & XOAY MÀN HÌNH (Giữ nguyên logic cũ của bạn) ---
     function updateUIButtonScale() {
-        //const container = document.getElementById('game-container')!;
         const resetBtn = document.getElementById('btn-reset') as HTMLImageElement;
         if (!resetBtn) return; // Thêm check null cho an toàn
 
         const w = window.innerWidth;
         const h = window.innerHeight;
 
-        const scale = Math.min(w, h) / 1080; 
-        const baseSize = 100;
+        const scale = Math.min(w, h) / 1080;
+        const baseSize = 100; 
         const newSize = baseSize * scale;
 
         resetBtn.style.width = `${newSize}px`;

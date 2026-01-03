@@ -6,10 +6,28 @@ export default class PreloadScene2 extends Phaser.Scene {
         super(SceneKeys.Preload2);
     }
 
+    init() {
+        // console.log("Cleanup Scene 1");
+        // this.textures.remove(TextureKeys.S1_Banner);
+        // this.textures.remove(TextureKeys.S1_BannerText);
+        this.textures.remove(TextureKeys.S1_Board);
+        
+        // Xóa bộ phận Hà Mã (Chắc chắn không dùng ở Scene 2)
+        this.textures.remove(TextureKeys.S1_Hama_Template);
+        this.textures.remove(TextureKeys.S1_Hama_Frame);
+        this.textures.remove(TextureKeys.S1_Hama_Name);
+        this.textures.remove(TextureKeys.S1_Hama_Outline);
+        this.textures.remove(TextureKeys.S1_Hama_1);
+        this.textures.remove(TextureKeys.S1_Hama_2);
+        this.textures.remove(TextureKeys.S1_Hama_3);
+        this.textures.remove(TextureKeys.S1_Hama_4);
+        this.textures.remove(TextureKeys.S1_Hama_5);
+    }
+
     preload() {
-        // 3. Scene 2 Assets
+        // Scene 2 Assets
         this.load.image(TextureKeys.S2_Banner, 'assets/images/S2/banner_s2.png');
-        this.load.image(TextureKeys.S2_TextBanner, 'assets/images/S2/banner_text_ca_sau.png');
+        this.load.image(TextureKeys.S2_BannerText, 'assets/images/S2/banner_text_ca_sau.png');
         this.load.image(TextureKeys.S2_Board, 'assets/images/bg/board_scene_2.png');
 
         // - Con Cá Sấu Scene 2

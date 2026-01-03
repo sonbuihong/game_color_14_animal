@@ -1,30 +1,30 @@
 {
   "teacher": {
-    "baseScale": 0.8,
+    "baseScale": 0.9,
     "outlineKey": "hama_outline",
     "baseX_pct": 0.55, 
     "baseY_pct": 0.5,
     "parts": [
-      { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.8},
-      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.8},
-      { "key": "hama3", "offsetX": 0, "offsetY": 0, "scale": 0.8},
-      { "key": "hama4", "offsetX": 0, "offsetY": 0, "scale": 0.8},
-      { "key": "hama5", "offsetX": 0, "offsetY": 0, "scale": 0.8}
+      { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.9},
+      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.9},
+      { "key": "hama3", "offsetX": 0, "offsetY": 0, "scale": 0.9},
+      { "key": "hama4", "offsetX": 0, "offsetY": 0, "scale": 0.9},
+      { "key": "hama5", "offsetX": 0, "offsetY": 0, "scale": 0.9}
     ]
   },
   "letter": {
     "baseScale": 0.6,
     "outlineKey": "hama_template",
     "frameKey": "hama_frame",
-    "baseX_pct": 0.2,
+    "baseX_pct": 0.05,
     "baseY_pct": 0.28,
     "parts": []
   },
   "name": {
     "baseScale": 0.6,
     "outlineKey": "hama_name",
-    "baseX_pct": 0.78,
-    "baseY_pct": 0.17,
+    "baseX_pct": 0.92,
+    "baseY_pct": 0.2,
     "parts": []
   }
 }

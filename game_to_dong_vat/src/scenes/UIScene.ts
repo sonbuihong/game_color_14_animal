@@ -33,18 +33,21 @@ export default class UIScene extends Phaser.Scene {
         const bannerHeight = this.textures.get(TextureKeys.S1_Banner).getSourceImage().height * 0.7; // Tỉ lệ 0.7
 
         // Xác định TextureKeys dựa trên SceneKey
-        let bannerKey = TextureKeys.S1_Banner;
-        let textBannerKey = TextureKeys.S1_BannerText;
-
-        if (this.sceneKey === SceneKeys.Scene2) {
-            bannerKey = TextureKeys.S2_Banner;
-            textBannerKey = TextureKeys.S2_TextBanner;
+        if(this.sceneKey === SceneKeys.Scene1){
+            let bannerKey = TextureKeys.S1_Banner;
+            let textBannerKey = TextureKeys.S1_BannerText;
+            // Hiển thị Banner và Text
+            this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
+            this.add.image(cx, bannerY, textBannerKey).setScale(0.7).setOrigin(0.5, -1);
         }
 
-        // Hiển thị Banner và Text
-        this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
-        this.add.image(cx, bannerY, textBannerKey).setScale(0.7).setOrigin(0.5, -0.7);
-
+        if (this.sceneKey === SceneKeys.Scene2) {
+            let bannerKey = TextureKeys.S2_Banner;
+            let textBannerKey = TextureKeys.S2_BannerText;
+            // Hiển thị Banner và Text
+            this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
+            this.add.image(cx, bannerY, textBannerKey).setScale(0.7).setOrigin(0.5, -1);
+        }
 
         // Lưu ý: Bảng được giữ trong Game Scene vì nó đóng khung khu vực vẽ.
 

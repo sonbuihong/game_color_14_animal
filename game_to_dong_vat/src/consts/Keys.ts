@@ -3,6 +3,7 @@
 // 1. Tên các Màn chơi (Scene)
 export enum SceneKeys {
     Preload = 'PreloadScene',
+    Preload1 = 'PreloadScene1',
     Preload2 = 'PreloadScene2',
     Scene1 = 'Scene1',
     Scene2 = 'Scene2',
@@ -17,17 +18,17 @@ export enum TextureKeys {
     BtnReset = 'btn_reset',
     BtnEraser = 'btn_eraser',
     HandHint = 'hand_hint',
-    
+    BoardBottom = 'board_bottom',
+
     // --- Scene 1 ---
     S1_Banner = 'banner_s1',
     S1_BannerText = 'banner_text_s1',
     S1_Board = 'board_white',
-    S1_BoardBottom = 'board_bottom',
     S1_TextResult = 'text_result_s1',
 
     // --- Scene 2 (Tô Màu) ---
     S2_Banner = 'banner_s2',
-    S2_TextBanner = 'text_banner_s2',
+    S2_BannerText = 'text_banner_s2',
     S2_Board = 'board_s2',
     
     // Các bộ phận tô màu
@@ -35,7 +36,7 @@ export enum TextureKeys {
     S1_Hama_Frame = 'hama_frame',
 
     // Tô màu Hà Mã
-    S1_Name = 'hama_name',
+    S1_Hama_Name = 'hama_name',
     S1_Hama_Outline = 'hama_outline',
     S1_Hama_1 = 'hama1',
     S1_Hama_2 = 'hama2',

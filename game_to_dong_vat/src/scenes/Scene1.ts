@@ -178,13 +178,13 @@ export default class Scene1 extends Phaser.Scene {
         const board = this.add
             .image(cx, boardY, TextureKeys.S1_Board)
             .setOrigin(0.5, 0)
-            .setScale(0.72)
+            .setScale(1, 0.72)
             .setDepth(0);
 
         const bottom_board = this.add
-            .image(cx, boardY + board.displayHeight - 200, TextureKeys.S1_BoardBottom)
+            .image(cx, boardY + board.displayHeight - 200, TextureKeys.BoardBottom)
             .setOrigin(0.5, 0)
-            .setScale(0.72)
+            .setScale(1, 0.72)
             .setDepth(10);
         
         // Lấy scene chung và ép kiểu sang UIScene để truy cập các thuộc tính public
