@@ -34,6 +34,7 @@ export default class PreloadScene2 extends Phaser.Scene {
         this.load.image(TextureKeys.S2_CaSau_Template, 'assets/images/S2/ca_sau_template.png');
         this.load.image(TextureKeys.S2_CaSau_Frame, 'assets/images/S2/frame.png');
         this.load.image(TextureKeys.S2_CaSau_Name, 'assets/images/S2/ca_sau_name.png');
+        this.load.image(TextureKeys.S2_CaSau_Name_Bg, 'assets/images/S2/ca_sau_name_bg.png');
         this.load.image(TextureKeys.S2_CaSau_Outline, 'assets/images/S2/ca_sau_outline.png');
         this.load.image(TextureKeys.S2_CaSau_1, 'assets/images/S2/ca_sau_1.png');
         this.load.image(TextureKeys.S2_CaSau_2, 'assets/images/S2/ca_sau_2.png');
@@ -43,10 +44,8 @@ export default class PreloadScene2 extends Phaser.Scene {
         // Bảng màu Scene 2
         this.load.image(TextureKeys.S2_BtnWhite, 'assets/images/color2/white.png');
         this.load.image(TextureKeys.S2_BtnCream, 'assets/images/color2/cream.png');
-        this.load.image(TextureKeys.S2_BtnBlack, 'assets/images/color2/black.png');
         this.load.image(TextureKeys.S2_BtnGreen1, 'assets/images/color2/green1.png');
         this.load.image(TextureKeys.S2_BtnGreen2, 'assets/images/color2/green2.png');
-        this.load.image(TextureKeys.S2_BtnGreen3, 'assets/images/color2/green3.png');
         this.load.image(TextureKeys.S2_BtnGreen4, 'assets/images/color2/green4.png');
 
         // - Config JSON for Scene 2

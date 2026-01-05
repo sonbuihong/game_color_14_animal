@@ -16,6 +16,8 @@ import {
 import AudioManager from '../audio/AudioManager';
 import { showGameButtons } from '../main';
 
+import FPSCounter from '../utils/FPSCounter';
+
 export default class Scene1 extends Phaser.Scene {
     // Đối tượng âm thanh nền (Background Music)
     private bgm!: Phaser.Sound.BaseSound;
@@ -23,7 +25,7 @@ export default class Scene1 extends Phaser.Scene {
     // --- QUẢN LÝ LOGIC (MANAGERS) ---
     private paintManager!: PaintManager; // Quản lý việc tô màu, cọ vẽ, canvas
     private idleManager!: IdleManager; // Quản lý thời gian rảnh để hiện gợi ý
-
+    private fpsCounter!: FPSCounter; // ✅ FPS Counter Utility
     // --- QUẢN LÝ TRẠNG THÁI GAME (GAME STATE) ---
     // Map lưu các bộ phận chưa tô xong (Key: ID, Value: Image Object) -> Dùng để random gợi ý
     private unfinishedPartsMap: Map<string, Phaser.GameObjects.Image> =
@@ -34,8 +36,6 @@ export default class Scene1 extends Phaser.Scene {
     private isIntroActive: boolean = false; // Cờ chặn tương tác khi đang chạy intro
 
     // --- UI COMPONENTS ---
-    private fpsText!: Phaser.GameObjects.Text;
-    
     private get handHint(): Phaser.GameObjects.Image | undefined {
          const uiScene = this.scene.get(SceneKeys.UI) as any;
          return uiScene?.handHint;
@@ -85,12 +85,8 @@ export default class Scene1 extends Phaser.Scene {
             if (this.input.keyboard) this.input.keyboard.enabled = true;
         });
 
-        // Tạo một dòng text để hiển thị FPS ở góc trái trên
-        this.fpsText = this.add.text(10, 10, 'FPS: 0', {
-            font: '16px Arial',
-            color: '#00ff00',
-            backgroundColor: '#000000'
-        }).setScrollFactor(0).setDepth(100);
+        // ✅ HIỂN THỊ FPS
+        this.fpsCounter = new FPSCounter(this);
     }
 
     update(time: number, delta: number) {
@@ -106,11 +102,10 @@ export default class Scene1 extends Phaser.Scene {
             this.idleManager.update(delta);
         }
 
-        // Lấy FPS thực tế và làm tròn số
-        const fps = Math.floor(this.game.loop.actualFps);
-        
-        // Cập nhật nội dung text
-        this.fpsText.setText('FPS: ' + fps);
+        // Cập nhật FPS
+        if (this.fpsCounter) {
+            this.fpsCounter.update();
+        }
     }
 
     shutdown() {
@@ -194,12 +189,13 @@ export default class Scene1 extends Phaser.Scene {
             .setScale(1, 0.72)
             .setDepth(0);
 
-        const bottom_board = this.add
-            .image(cx, boardY + board.displayHeight - 200, TextureKeys.BoardBottom)
-            .setOrigin(0.5, 0)
+        const boardRightX = board.x + board.displayWidth / 2;
+        const boardCenterY = board.y + board.displayHeight / 2;
+        const rightBoard = this.add
+            .image(boardRightX - 8, boardCenterY, TextureKeys.BoardRight)
+            .setOrigin(1, 0.5)
             .setScale(1, 0.72)
             .setDepth(10);
-        
         // Lấy scene chung và ép kiểu sang UIScene để truy cập các thuộc tính public
         // Chúng ta sẽ xóa việc tạo cục bộ ở đây.
     }
@@ -432,14 +428,17 @@ export default class Scene1 extends Phaser.Scene {
         const UI = GameConstants.SCENE2.UI;
         const INTRO = GameConstants.SCENE2.INTRO_HAND;
 
-        // Tính toán tọa độ nút màu đầu tiên
-        const spacing = GameUtils.pctX(this, UI.PALETTE_SPACING);
-        const totalItems = GameConstants.PALETTE_DATA.length + 1;
-        const firstBtnX = (GameUtils.getW(this) - (totalItems - 1) * spacing) / 2;
-        const firstBtnY = GameUtils.pctY(this, UI.PALETTE_Y);
+        // Tính toán tọa độ nút màu đầu tiên (Vertical Layout)
+        const spacingY = GameUtils.pctX(this, UI.PALETTE_SPACING_Y);
+        const startY = GameUtils.pctY(this, UI.PALETTE_START_Y); 
+        const paletteX = GameUtils.pctX(this, UI.PALETTE_X);
+
+        // Nút đầu tiên nằm ở đỉnh cột
+        const firstBtnX = paletteX;
+        const firstBtnY = startY;
 
         const startX = firstBtnX + 20;
-        const startY = firstBtnY + 20;
+        const startYPos = firstBtnY + 20; // Tránh trùng biến startY
         const dragY = destY + 30; // Kéo tay xuống thấp hơn điểm đích một chút để không che mất
 
         if (!this.handHint) return;

@@ -14,7 +14,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image(TextureKeys.BtnEraser, 'assets/images/ui/btn_eraser.png');
         this.load.image(TextureKeys.HandHint, 'assets/images/ui/hand.png');
         
-        this.load.image(TextureKeys.BoardBottom, 'assets/images/bg/bottom_board.png');
+        this.load.image(TextureKeys.BoardRight, 'assets/images/bg/right_board.png');
 
         // 4. End Game Assets
         this.load.image(TextureKeys.End_Icon, 'assets/images/ui/icon_end.png');
@@ -25,7 +25,7 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     create() {
-        // Tải xong thì chuyển sang PreloadScene1
+        // Tải xong thì chuyển sang PreloadScene1 
         this.scene.start(SceneKeys.Preload1);
     }
 }

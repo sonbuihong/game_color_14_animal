@@ -16,6 +16,8 @@ import {
 import AudioManager from '../audio/AudioManager';
 import { showGameButtons } from '../main';
 
+import FPSCounter from '../utils/FPSCounter';
+
 export default class Scene2 extends Phaser.Scene {
     // Đối tượng âm thanh nền (Background Music)
     private bgm!: Phaser.Sound.BaseSound;
@@ -23,6 +25,7 @@ export default class Scene2 extends Phaser.Scene {
     // --- QUẢN LÝ LOGIC (MANAGERS) ---
     private paintManager!: PaintManager; // Quản lý việc tô màu, cọ vẽ, canvas
     private idleManager!: IdleManager; // Quản lý thời gian rảnh để hiện gợi ý
+    private fpsCounter!: FPSCounter; // ✅ FPS Counter
 
     // --- QUẢN LÝ TRẠNG THÁI GAME (GAME STATE) ---
     // Map lưu các bộ phận chưa tô xong (Key: ID, Value: Image Object) -> Dùng để random gợi ý
@@ -82,6 +85,9 @@ export default class Scene2 extends Phaser.Scene {
             this.idleManager.reset();
             if (this.input.keyboard) this.input.keyboard.enabled = true;
         });
+
+        // ✅ HIỂN THỊ FPS
+        this.fpsCounter = new FPSCounter(this);
     }
 
     update(time: number, delta: number) {
@@ -95,6 +101,11 @@ export default class Scene2 extends Phaser.Scene {
             this.finishedParts.size < this.totalParts
         ) {
             this.idleManager.update(delta);
+        }
+
+        // Cập nhật FPS
+        if (this.fpsCounter) {
+            this.fpsCounter.update();
         }
     }
 
@@ -175,15 +186,17 @@ export default class Scene2 extends Phaser.Scene {
 
         const boardY = bannerHeight + GameUtils.pctY(this, UI.BOARD_OFFSET);
         const board = this.add
-            .image(cx, boardY, TextureKeys.S2_Board) // Use S2_Board
+            .image(cx, boardY, TextureKeys.S2_Board)
             .setOrigin(0.5, 0)
-            .setScale(0.72)
+            .setScale(1, 0.72)
             .setDepth(0);
 
-        const bottom_board = this.add
-            .image(cx, boardY + board.displayHeight - 200, TextureKeys.BoardBottom)
-            .setOrigin(0.5, 0)
-            .setScale(0.72)
+        const boardRightX = board.x + board.displayWidth / 2;
+        const boardCenterY = board.y + board.displayHeight / 2;
+        const rightBoard = this.add
+            .image(boardRightX - 8, boardCenterY, TextureKeys.BoardRight)
+            .setOrigin(1, 0.5)
+            .setScale(1, 0.72)
             .setDepth(10);
     }
 
@@ -331,9 +344,10 @@ export default class Scene2 extends Phaser.Scene {
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
             AudioManager.play('sfx-correct_s2');
-            this.time.delayedCall(GameConstants.SCENE2.TIMING.WIN_DELAY, () =>
-                this.scene.start(SceneKeys.EndGame)
-            );
+            this.time.delayedCall(GameConstants.SCENE2.TIMING.WIN_DELAY, () => {
+                this.scene.stop(SceneKeys.UI);
+                this.scene.start(SceneKeys.EndGame);
+            });
         }
     }
 
@@ -415,14 +429,17 @@ export default class Scene2 extends Phaser.Scene {
         const UI = GameConstants.SCENE2.UI;
         const INTRO = GameConstants.SCENE2.INTRO_HAND;
 
-        // Tính toán tọa độ nút màu đầu tiên
-        const spacing = GameUtils.pctX(this, UI.PALETTE_SPACING);
-        const totalItems = GameConstants.PALETTE_DATA.length + 1;
-        const firstBtnX = (GameUtils.getW(this) - (totalItems - 1) * spacing) / 2;
-        const firstBtnY = GameUtils.pctY(this, UI.PALETTE_Y);
+        // Tính toán tọa độ nút màu đầu tiên (Vertical Layout)
+        const spacingY = GameUtils.pctX(this, UI.PALETTE_SPACING_Y);
+        const startY = GameUtils.pctY(this, UI.PALETTE_START_Y); 
+        const paletteX = GameUtils.pctX(this, UI.PALETTE_X);
+
+        // Nút đầu tiên nằm ở đỉnh cột
+        const firstBtnX = paletteX;
+        const firstBtnY = startY;
 
         const startX = firstBtnX + 20;
-        const startY = firstBtnY + 20;
+        const startYPos = firstBtnY + 20; // Tránh trùng biến startY
         const dragY = destY + 30; // Kéo tay xuống thấp hơn điểm đích một chút để không che mất
 
         if (!this.handHint) return;

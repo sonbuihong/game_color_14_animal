@@ -81,13 +81,16 @@ export class PaintManager {
         const rtH = maskImage.height * scale;
         const rt = this.scene.add.renderTexture(x - rtW/2, y - rtH/2, rtW, rtH);
         
-        rt.setOrigin(0, 0).setMask(mask).setDepth(10);
+        // ✅ TỐI ƯU: Không set mask ngay lập tức để giảm tải render
+        // rt.setMask(mask); 
+        rt.setOrigin(0, 0).setDepth(10);
+        
         rt.setData('id', uniqueId);
         rt.setData('key', key); 
         rt.setData('isFinished', false);
+        rt.setData('mask', mask); // Lưu mask vào data để dùng sau
+        
         if (this.ignoreCameraId) rt.cameraFilter = this.ignoreCameraId;
-
-        //tắt mark
         
         // ✅ LOGIC MÀU: Tạo hitArea với opacity thấp để dễ nhìn
         const hitArea = this.scene.add.image(x, y, key).setScale(scale).setAlpha(0.01).setDepth(50);
@@ -95,6 +98,12 @@ export class PaintManager {
         if (this.ignoreCameraId) hitArea.cameraFilter = this.ignoreCameraId;
 
         hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            // ✅ TỐI ƯU: Khi chạm vào mới bật mask lên
+            if (!rt.mask) {
+                const storedMask = rt.getData('mask');
+                if (storedMask) rt.setMask(storedMask);
+            }
+
             this.activeRenderTexture = rt;
             
             // ✅ QUAN TRỌNG: Lưu vị trí bắt đầu để tính toán LERP
@@ -137,7 +146,9 @@ export class PaintManager {
         if (distance < 1) return;
 
         // 3. Thuật toán LERP (Nội suy)
-        const stepSize = this.brushSize / 4; // Mật độ vẽ
+        // ✅ TỐI ƯU FPS: Giãn khoảng cách vẽ ra một chút.
+        // Trước: /4 (Quá dày -> Lag).
+        const stepSize = Math.max(this.brushSize / 3.5, 1);
         const steps = Math.ceil(distance / stepSize);
         const offset = this.brushSize / 2;
 
@@ -212,7 +223,7 @@ export class PaintManager {
             
             if (percentage > GameConstants.PAINT.WIN_PERCENT) {
                 rt.setData('isFinished', true);
-                
+
                 // ✅ GỬI DANH SÁCH MÀU VỀ SCENE
                 const usedColors = this.partColors.get(id) || new Set([this.brushColor]);
                 this.onPartComplete(id, rt, usedColors);

@@ -11,6 +11,8 @@ export default class EndGameScene extends Phaser.Scene {
 
     constructor() { super('EndGameScene'); }
 
+    
+
     preload() {
         this.load.image('icon', 'assets/images/ui/icon_end.png');
         

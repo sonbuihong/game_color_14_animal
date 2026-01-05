@@ -68,22 +68,24 @@ export default class UIScene extends Phaser.Scene {
             ? GameConstants.PALETTE_DATA_S2 
             : GameConstants.PALETTE_DATA;
 
-        const spacing = GameUtils.pctX(this, UI.PALETTE_SPACING);
-        const yPos = GameUtils.pctY(this, UI.PALETTE_Y);
-        const totalItems = paletteData.length + 1;
-        const startX = (GameUtils.getW(this) - (totalItems - 1) * spacing) / 2;
+        const spacingY = GameUtils.pctY(this, UI.PALETTE_SPACING_Y);
+        const startY = GameUtils.pctY(this, UI.PALETTE_START_Y);
+        const paletteX = GameUtils.pctX(this, UI.PALETTE_X);
 
         paletteData.forEach((item, i) => {
-            const btnX = startX + i * spacing;
-            const btn = this.add.image(btnX, yPos, item.key).setInteractive().setDepth(1);
+            // Logic 1 cột:
+            const btnX = paletteX;
+            const btnY = startY + i * spacingY;
+
+            const btn = this.add.image(btnX, btnY, item.key).setInteractive().setDepth(1);
 
             // Logic visual: Nút đầu tiên to hơn (đang chọn)
             if (i === 0) {
                 this.firstColorBtn = btn;
-                btn.setScale(0.8).setAlpha(1);
+                btn.setScale(0.9).setAlpha(1);
                 this.paintManager.setColor(item.color); // ✅ Sync màu cọ với nút đầu tiên
             } else {
-                btn.setAlpha(0.8).setScale(0.6);
+                btn.setAlpha(0.8).setScale(0.7);
             }
 
             btn.on('pointerdown', () => {
@@ -93,13 +95,17 @@ export default class UIScene extends Phaser.Scene {
             this.paletteButtons.push(btn);
         });
 
-        // Tạo nút Tẩy (Eraser)
-        const eraserX = startX + paletteData.length * spacing;
+        // Tạo nút Tẩy (Eraser) - Nằm tiếp theo trong cột
+        const eraserIndex = paletteData.length;
+        
+        const eraserX = paletteX;
+        const eraserY = startY + eraserIndex * spacingY;
+
         const eraser = this.add
-            .image(eraserX, yPos, TextureKeys.BtnEraser)
+            .image(eraserX, eraserY, TextureKeys.BtnEraser)
             .setInteractive()
             .setAlpha(0.8)
-            .setScale(0.6)
+            .setScale(0.7)
             .setDepth(1);
         eraser.on('pointerdown', () => {
             this.updatePaletteVisuals(eraser);
@@ -110,7 +116,7 @@ export default class UIScene extends Phaser.Scene {
 
     // Cập nhật hiệu ứng to/nhỏ của các nút màu khi được chọn
     private updatePaletteVisuals(activeBtn: Phaser.GameObjects.Image) {
-        this.paletteButtons.forEach((b) => b.setScale(0.6).setAlpha(0.8));
-        activeBtn.setScale(0.8).setAlpha(1);
+        this.paletteButtons.forEach((b) => b.setScale(0.7).setAlpha(0.8));
+        activeBtn.setScale(0.9).setAlpha(1);
     }
 }

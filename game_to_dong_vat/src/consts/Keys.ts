@@ -18,7 +18,7 @@ export enum TextureKeys {
     BtnReset = 'btn_reset',
     BtnEraser = 'btn_eraser',
     HandHint = 'hand_hint',
-    BoardBottom = 'board_bottom',
+    BoardRight = 'board_right',
 
     // --- Scene 1 ---
     S1_Banner = 'banner_s1',
@@ -37,17 +37,18 @@ export enum TextureKeys {
 
     // Tô màu Hà Mã
     S1_Hama_Name = 'hama_name',
+    S1_Hama_Name_Bg = 'hama_name_bg',
     S1_Hama_Outline = 'hama_outline',
     S1_Hama_1 = 'hama1',
     S1_Hama_2 = 'hama2',
     S1_Hama_3 = 'hama3',
     S1_Hama_4 = 'hama4',
-    S1_Hama_5 = 'hama5',
 
     // Tô màu Cá Sấu
     S2_CaSau_Template = 'ca_sau_template',
     S2_CaSau_Frame = 'ca_sau_frame',
     S2_CaSau_Name = 'ca_sau_name',
+    S2_CaSau_Name_Bg = 'ca_sau_name_bg',
     S2_CaSau_Outline = 'ca_sau_outline',
     S2_CaSau_1 = 'ca_sau_1',
     S2_CaSau_2 = 'ca_sau_2',
@@ -66,10 +67,8 @@ export enum TextureKeys {
     // Các nút màu Scene 2
     S2_BtnWhite = 's2_btn_white',
     S2_BtnCream = 's2_btn_cream',
-    S2_BtnBlack = 's2_btn_black',
     S2_BtnGreen1 = 's2_btn_green1',
     S2_BtnGreen2 = 's2_btn_green2',
-    S2_BtnGreen3 = 's2_btn_green3',
     S2_BtnGreen4 = 's2_btn_green4',
 
     // --- End Game ---
