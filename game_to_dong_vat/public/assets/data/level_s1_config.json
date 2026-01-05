@@ -6,9 +6,7 @@
     "baseY_pct": 0.585,
     "parts": [
       { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.9},
-      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.9},
-      { "key": "hama3", "offsetX": 0, "offsetY": 0, "scale": 0.9},
-      { "key": "hama4", "offsetX": 0, "offsetY": 0, "scale": 0.9}
+      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.9}
     ]
   },
   "letter": {

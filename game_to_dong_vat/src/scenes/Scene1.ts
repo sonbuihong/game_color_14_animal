@@ -25,7 +25,7 @@ export default class Scene1 extends Phaser.Scene {
     // --- QUẢN LÝ LOGIC (MANAGERS) ---
     private paintManager!: PaintManager; // Quản lý việc tô màu, cọ vẽ, canvas
     private idleManager!: IdleManager; // Quản lý thời gian rảnh để hiện gợi ý
-    private fpsCounter!: FPSCounter; // ✅ FPS Counter Utility
+    private fpsCounter!: FPSCounter;
     // --- QUẢN LÝ TRẠNG THÁI GAME (GAME STATE) ---
     // Map lưu các bộ phận chưa tô xong (Key: ID, Value: Image Object) -> Dùng để random gợi ý
     private unfinishedPartsMap: Map<string, Phaser.GameObjects.Image> =
@@ -86,7 +86,7 @@ export default class Scene1 extends Phaser.Scene {
         });
 
         // ✅ HIỂN THỊ FPS
-        this.fpsCounter = new FPSCounter(this);
+        // this.fpsCounter = new FPSCounter(this);
     }
 
     update(time: number, delta: number) {
@@ -340,8 +340,15 @@ export default class Scene1 extends Phaser.Scene {
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
             AudioManager.play('sfx-correct_s2');
+            
+            // Xóa UI (Nút màu)
+            const uiScene = this.scene.get(SceneKeys.UI) as any;
+            if (uiScene && uiScene.hidePalette) {
+                uiScene.hidePalette();
+            }
+
             this.time.delayedCall(GameConstants.SCENE2.TIMING.WIN_DELAY, () =>
-                this.scene.start(SceneKeys.Preload2)
+                this.scene.start(SceneKeys.EndGame)
             );
         }
         

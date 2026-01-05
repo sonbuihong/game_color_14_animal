@@ -20,8 +20,6 @@ export default class PreloadScene1 extends Phaser.Scene {
         this.load.image(TextureKeys.S1_Hama_Outline, 'assets/images/S1/hama_outline.png');
         this.load.image(TextureKeys.S1_Hama_1, 'assets/images/S1/hama1.png');
         this.load.image(TextureKeys.S1_Hama_2, 'assets/images/S1/hama2.png');
-        this.load.image(TextureKeys.S1_Hama_3, 'assets/images/S1/hama3.png');
-        this.load.image(TextureKeys.S1_Hama_4, 'assets/images/S1/hama4.png');
 
         // Bảng màu Scene 1
         this.load.image(TextureKeys.BtnViolet, 'assets/images/color/violet.png');

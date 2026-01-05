@@ -119,4 +119,14 @@ export default class UIScene extends Phaser.Scene {
         this.paletteButtons.forEach((b) => b.setScale(0.7).setAlpha(0.8));
         activeBtn.setScale(0.9).setAlpha(1);
     }
+
+    public hidePalette() {
+        this.tweens.add({
+            targets: this.paletteButtons,
+            scale: 0,
+            alpha: 0,
+            duration: 500,
+            ease: 'Back.In'
+        });
+    }
 }

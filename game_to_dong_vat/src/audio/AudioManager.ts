@@ -110,12 +110,29 @@ class AudioManager {
      * @returns {number | undefined} - Sound ID của Howler
      */
     play(id: string): number | undefined {
-        if (!this.isLoaded || !this.sounds[id]) {
-            console.warn(
-                `[AudioManager] Sound ID not found or not loaded: ${id}`
-            );
-            return;
+        // --- LAZY LOAD IMPLEMENTATION ---
+        
+        // 1. Nếu chưa có instance -> Tạo mới (Lazy Load)
+        if (!this.sounds[id]) {
+            const config = SOUND_MAP[id];
+            if (!config) {
+                 console.warn(`[AudioManager] Sound ID not found in config: ${id}`);
+                 return;
+            }
+
+            console.log(`[AudioManager] Lazy loading sound: ${id}`);
+            this.sounds[id] = new Howl({
+                src: [config.src],
+                loop: config.loop || false,
+                volume: config.volume || 1.0,
+                html5: true, 
+                onloaderror: (_sndId, error) => {
+                     console.error(`[Howler Error] Load failed for ${id}:`, error);
+                }
+            });
         }
+
+        // 2. Play
         return this.sounds[id].play();
     }
 
@@ -124,7 +141,7 @@ class AudioManager {
      * @param {string} id - ID âm thanh
      */
     stop(id: string): void {
-        if (!this.isLoaded || !this.sounds[id]) return;
+        if (!this.sounds[id]) return;
         this.sounds[id].stop();
     }
 

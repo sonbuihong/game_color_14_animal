@@ -23,6 +23,10 @@ export class PaintManager {
     // ✅ LOGIC MÀU: Map lưu danh sách màu đã dùng cho từng phần (Key: ID, Value: Set màu)
     private partColors: Map<string, Set<number>> = new Map();
 
+    // ✅ OPTIMIZATION: Track unchecked painting distance per part
+    private partUncheckedMetrics: Map<string, number> = new Map();
+    private readonly CHECK_THRESHOLD: number = 300; // Check progress every ~300px of painting
+
     // ✅ TỐI ƯU RAM: Tạo sẵn Canvas tạm để tái sử dụng, không new mới liên tục
     private helperCanvasPaint: HTMLCanvasElement;
     private helperCanvasMask: HTMLCanvasElement;
@@ -128,7 +132,15 @@ export class PaintManager {
             return;
         }
         if (this.activeRenderTexture) {
-            this.checkProgress(this.activeRenderTexture);
+            // ✅ TỐI ƯU: Chỉ check progress nếu đã vẽ đủ nhiều (Throttle)
+            const id = this.activeRenderTexture.getData('id');
+            const dist = this.partUncheckedMetrics.get(id) || 0;
+            
+            if (dist > this.CHECK_THRESHOLD) {
+                this.checkProgress(this.activeRenderTexture);
+                this.partUncheckedMetrics.set(id, 0); // Reset distance
+            }
+            
             this.activeRenderTexture = null;
         }
     }
@@ -145,10 +157,14 @@ export class PaintManager {
         // Tối ưu: Nếu di chuyển quá ít (< 1px) thì bỏ qua
         if (distance < 1) return;
 
+        // ✅ Accumulate distance for throttling checks
+        const id = rt.getData('id');
+        const currentDist = this.partUncheckedMetrics.get(id) || 0;
+        this.partUncheckedMetrics.set(id, currentDist + distance);
+
         // 3. Thuật toán LERP (Nội suy)
         // ✅ TỐI ƯU FPS: Giãn khoảng cách vẽ ra một chút.
-        // Trước: /4 (Quá dày -> Lag).
-        const stepSize = Math.max(this.brushSize / 3.5, 1);
+        const stepSize = this.brushSize / 4;
         const steps = Math.ceil(distance / stepSize);
         const offset = this.brushSize / 2;
 
@@ -170,8 +186,9 @@ export class PaintManager {
         } else {
             rt.draw(this.brushTexture, currentX - offset, currentY - offset, 1.0, this.brushColor);
             
-            // ✅ LOGIC LƯU MÀU: Thêm màu hiện tại vào danh sách
-            const id = rt.getData('id');
+            // ✅ MOVED OUTSIDE OF LOOP: color tracking only triggers ONCE per paint action
+            // Optimization: checking set has/add is fast, but doing it inside loop is wasteful.
+            // Since activeRenderTexture is set, we do it here (once per pointermove event).
             if (!this.partColors.has(id)) {
                 this.partColors.set(id, new Set());
             }
@@ -230,6 +247,7 @@ export class PaintManager {
                 
                 // Clear bộ nhớ màu của phần này cho nhẹ
                 this.partColors.delete(id);
+                this.partUncheckedMetrics.delete(id); // Cleanup metrics
             }
         });
     }

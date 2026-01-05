@@ -277,7 +277,7 @@ function updateRotateHint() {
         if (interruptedVoiceKey) {
             console.log(`[Rotate] Phục hồi voice bị ngắt: ${interruptedVoiceKey}`);
             
-            // Xử lý đặc biệt cho Scene 2 (cần chạy lại cả Intro chứ không chỉ Voice)
+            // Xử lý đặc biệt cho Scene 1 (cần chạy lại cả Intro chứ không chỉ Voice)
             if (interruptedVoiceKey === 'voice_intro_s2' && gameSceneReference.restartIntro) {
                 gameSceneReference.restartIntro(); 
             } 
