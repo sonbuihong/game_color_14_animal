@@ -273,14 +273,11 @@ export default class Scene2 extends Phaser.Scene {
             // --- BEST PRACTICE: LƯU DỮ LIỆU TĨNH & TÍNH TOÁN TỰ ĐỘNG ---
             // 1. Ưu tiên lấy từ Config nếu có (Manual override)
             // 2. Nếu không có, tự động tính toán trọng tâm (Auto centroid)
-            let hX = part.hintX || 0;
-            let hY = part.hintY || 0;
-
-            if (hX === 0 && hY === 0) {
-                const centerOffset = GameUtils.calculateCenteredOffset(this, part.key);
-                hX = centerOffset.x;
-                hY = centerOffset.y;
-            }
+            // --- BEST PRACTICE: LUÔN TỰ ĐỘNG TÍNH TOÁN TRỌNG TÂM THÔNG MINH ---
+            // Không dùng config cứng nữa, để thuật toán logic mới tự tìm điểm "ngon" nhất
+            const centerOffset = GameUtils.calculateCenteredOffset(this, part.key);
+            let hX = centerOffset.x;
+            let hY = centerOffset.y;
 
             // Lưu các thông số cấu hình vào Data Manager của Game Object.
             hitArea.setData('hintX', hX);
@@ -444,6 +441,7 @@ export default class Scene2 extends Phaser.Scene {
 
         if (!this.handHint) return;
 
+        this.handHint.setOrigin(0, 0);
         this.handHint.setPosition(startX, startY).setAlpha(0).setScale(0.7);
 
         // Chuỗi Animation: Hiện -> Ấn chọn màu -> Kéo ra -> Di đi di lại (tô) tại đúng vị trí -> Biến mất
@@ -525,7 +523,10 @@ export default class Scene2 extends Phaser.Scene {
         const destY = target.y + (hY * originScale);
 
         if (!this.handHint) return;
-        this.handHint.setPosition(destX + IDLE_CFG.OFFSET_X, destY + IDLE_CFG.OFFSET_Y).setAlpha(0).setScale(0.7);
+
+        // --- CẬP NHẬT: SET ORIGIN (0,0) ĐỂ NGÓN TAY (GÓC TRÁI TRÊN) CHỈ ĐÚNG VÀO ĐIỂM ---
+        this.handHint.setOrigin(0, 0);
+        this.handHint.setPosition(destX, destY).setAlpha(0).setScale(0.7);
         
         this.tweens.chain({
             targets: this.handHint,

@@ -43,6 +43,13 @@ export class GameUtils {
      * @param textureKey Key của texture cần tính
      * @returns {x: number, y: number} Offset từ tâm
      */
+    /**
+     * Tính toán điểm gợi ý tốt nhất trên vùng ảnh không trong suốt.
+     * 1. Tính trọng tâm (Centroid).
+     * 2. Nếu trọng tâm rơi vào vùng trong suốt -> Tìm pixel đặc gần nhất.
+     * @param scene Context scene
+     * @param textureKey Texture Key
+     */
     static calculateCenteredOffset(scene: Phaser.Scene, textureKey: string): { x: number, y: number } {
         const texture = scene.textures.get(textureKey);
         const sourceImage = texture.getSourceImage();
@@ -65,28 +72,103 @@ export class GameUtils {
             let sumY = 0;
             let pixelCount = 0;
 
-            for (let y = 0; y < h; y += 4) { // Tối ưu: Bước nhảy 4 là đủ tốt
-                for (let x = 0; x < w; x += 4) {
+            // Lưu danh sách các pixel đặc để fallback nếu trọng tâm bị rỗng
+            const validPixels: { x: number, y: number }[] = [];
+
+            // Bước nhảy: 4 pixel (tăng tốc độ xử lý)
+            const step = 4;
+            
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
                     const index = (y * w + x) * 4;
                     const alpha = data[index + 3];
                     
-                    if (alpha > 20) { // Ngưỡng alpha để bỏ qua viền quá mờ
+                    if (alpha > 50) { // Ngưỡng alpha an toàn
                         sumX += x;
                         sumY += y;
                         pixelCount++;
+                        validPixels.push({ x, y });
                     }
                 }
             }
 
-            if (pixelCount === 0) return { x: 0, y: 0 };
+            if (pixelCount === 0 || validPixels.length === 0) return { x: 0, y: 0 };
 
-            const centroidX = sumX / pixelCount;
-            const centroidY = sumY / pixelCount;
+            // 1. Tính trọng tâm lý thuyết
+            let centerX = Math.floor(sumX / pixelCount);
+            let centerY = Math.floor(sumY / pixelCount);
 
-            // Tính offset so với tâm của ảnh (width/2, height/2)
-            // Vì Game Object thường có Origin là (0.5, 0.5)
-            const offsetX = centroidX - (w / 2);
-            const offsetY = centroidY - (h / 2);
+            // 2. Kiểm tra xem trọng tâm có nằm trên pixel đặc không
+            const centerIndex = (centerY * w + centerX) * 4;
+            const centerAlpha = data[centerIndex + 3];
+
+            // Hàm kiểm tra một pixel có phải là "nội bộ" không (được bao quanh bởi pixel đặc)
+            // Check 8 hướng (trên, dưới, trái, phải, và 4 góc chéo) để đảm bảo nằm sâu bên trong
+            const isSurrounded = (tx: number, ty: number) => {
+                const dist = 2; // Khoảng cách check (offset)
+                const offsets = [
+                    { dx: 0, dy: -dist },     // Trên
+                    { dx: 0, dy: dist },      // Dưới
+                    { dx: -dist, dy: 0 },     // Trái
+                    { dx: dist, dy: 0 },      // Phải
+                    { dx: -dist, dy: -dist }, // Trái-Trên
+                    { dx: dist, dy: -dist },  // Phải-Trên
+                    { dx: -dist, dy: dist },  // Trái-Dưới
+                    { dx: dist, dy: dist }    // Phải-Dưới
+                ];
+                
+                for (const o of offsets) {
+                    const nx = tx + o.dx;
+                    const ny = ty + o.dy;
+                    if (nx < 0 || nx >= w || ny < 0 || ny >= h) return false;
+                    const nIdx = (ny * w + nx) * 4;
+                    // Kiểm tra alpha (phải là pixel đặc)
+                    if (data[nIdx + 3] <= 50) return false;
+                }
+                return true;
+            };
+
+            // Nếu trọng tâm là pixel trong suốt (hoặc mờ)
+            if (!centerAlpha || centerAlpha <= 50) {
+                let minDist = Infinity;
+                let bestP = validPixels[0];
+                let foundSurrounded = false;
+
+                // Ưu tiên tìm pixel được bao quanh (inner pixel)
+                for (const p of validPixels) {
+                    const dist = (p.x - centerX) ** 2 + (p.y - centerY) ** 2;
+                    const surrounded = isSurrounded(p.x, p.y);
+
+                    // Logic chọn:
+                    // 1. Nếu chưa tìm thấy điểm surrounded nào -> Chấp nhận mọi điểm, tìm min dist.
+                    // 2. Nếu đã tìm thấy ít nhất 1 điểm surrounded -> Chỉ quan tâm điểm surrounded, tìm min dist.
+                    // 3. Nếu điểm hiện tại surrounded mà trước đó chưa có -> Reset min dist, chọn điểm này.
+                    
+                    if (surrounded) {
+                        if (!foundSurrounded) {
+                            // Tìm thấy điểm surrounded đầu tiên -> Reset để ưu tiên nhóm này
+                            foundSurrounded = true;
+                            minDist = dist;
+                            bestP = p;
+                        } else if (dist < minDist) {
+                            minDist = dist;
+                            bestP = p;
+                        }
+                    } else if (!foundSurrounded) {
+                        // Nếu chưa tìm thấy surrounded nào, cứ tìm min dist bình thường
+                        if (dist < minDist) {
+                            minDist = dist;
+                            bestP = p;
+                        }
+                    }
+                }
+                centerX = bestP.x;
+                centerY = bestP.y;
+            }
+
+            // Tính offset so với tâm ảnh (0.5, 0.5)
+            const offsetX = centerX - (w / 2);
+            const offsetY = centerY - (h / 2);
 
             return { x: offsetX, y: offsetY };
         }

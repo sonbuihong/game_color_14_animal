@@ -272,14 +272,11 @@ export default class Scene1 extends Phaser.Scene {
             // --- BEST PRACTICE: LƯU DỮ LIỆU TĨNH & TÍNH TOÁN TỰ ĐỘNG ---
             // 1. Ưu tiên lấy từ Config nếu có (Manual override)
             // 2. Nếu không có, tự động tính toán trọng tâm (Auto centroid)
-            let hX = part.hintX || 0;
-            let hY = part.hintY || 0;
-
-            if (hX === 0 && hY === 0) {
-                const centerOffset = GameUtils.calculateCenteredOffset(this, part.key);
-                hX = centerOffset.x;
-                hY = centerOffset.y;
-            }
+            // --- BEST PRACTICE: LUÔN TỰ ĐỘNG TÍNH TOÁN TRỌNG TÂM THÔNG MINH ---
+            // Không dùng config cứng nữa, để thuật toán logic mới tự tìm điểm "ngon" nhất
+            const centerOffset = GameUtils.calculateCenteredOffset(this, part.key);
+            let hX = centerOffset.x;
+            let hY = centerOffset.y;
 
             // Lưu các thông số cấu hình vào Data Manager của Game Object.
             hitArea.setData('hintX', hX);
@@ -395,7 +392,7 @@ export default class Scene1 extends Phaser.Scene {
             target = items[0]; // Lấy cái đầu tiên
             const hX = target.getData('hintX') || 0;
             const hY = target.getData('hintY') || 0;
-            const originScale = target.getData('originScale') || 1; 
+            const originScale = target.getData('originScale') || 1;
 
             // Tính tọa độ đích chính xác
             destX = target.x + (hX * originScale);
@@ -433,16 +430,12 @@ export default class Scene1 extends Phaser.Scene {
         const startY = GameUtils.pctY(this, UI.PALETTE_START_Y); 
         const paletteX = GameUtils.pctX(this, UI.PALETTE_X);
 
-        // Nút đầu tiên nằm ở đỉnh cột
-        const firstBtnX = paletteX;
-        const firstBtnY = startY;
-
-        const startX = firstBtnX + 20;
-        const startYPos = firstBtnY + 20; // Tránh trùng biến startY
+        const startX = paletteX;
         const dragY = destY + 30; // Kéo tay xuống thấp hơn điểm đích một chút để không che mất
 
         if (!this.handHint) return;
 
+        this.handHint.setOrigin(0, 0);
         this.handHint.setPosition(startX, startY).setAlpha(0).setScale(0.7);
 
         // Chuỗi Animation: Hiện -> Ấn chọn màu -> Kéo ra -> Di đi di lại (tô) tại đúng vị trí -> Biến mất
@@ -524,7 +517,12 @@ export default class Scene1 extends Phaser.Scene {
         const destY = target.y + (hY * originScale);
 
         if (!this.handHint) return;
-        this.handHint.setPosition(destX + IDLE_CFG.OFFSET_X, destY + IDLE_CFG.OFFSET_Y)
+        
+        // --- CẬP NHẬT: SET ORIGIN (0,0) ĐỂ NGÓN TAY (GÓC TRÁI TRÊN) CHỈ ĐÚNG VÀO ĐIỂM ---
+        this.handHint.setOrigin(0, 0);
+
+        // Không dùng OFFSET nữa vì muốn chỉ chính xác
+        this.handHint.setPosition(destX, destY)
             .setAlpha(0).setScale(0.7);
         
         this.tweens.chain({
