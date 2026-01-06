@@ -25,6 +25,9 @@ export class PaintManager {
 
     // ✅ OPTIMIZATION: Track unchecked painting distance per part
     private partUncheckedMetrics: Map<string, number> = new Map();
+    // ✅ OPTIMIZATION: Cache mask data to avoid redundant draw calls and readback
+    private maskCache: Map<string, Uint8ClampedArray> = new Map();
+    
     private readonly CHECK_THRESHOLD: number = 300; // Check progress every ~300px of painting
 
     // ✅ TỐI ƯU RAM: Tạo sẵn Canvas tạm để tái sử dụng, không new mới liên tục
@@ -37,6 +40,7 @@ export class PaintManager {
     constructor(scene: Phaser.Scene, onComplete: (id: string, rt: Phaser.GameObjects.RenderTexture, usedColors: Set<number>) => void) {
         this.scene = scene;
         this.onPartComplete = onComplete;
+        this.scene.input.topOnly = false;
         
         // Khởi tạo Canvas tạm 1 lần duy nhất
         this.helperCanvasPaint = document.createElement('canvas');
@@ -154,8 +158,8 @@ export class PaintManager {
         // 2. Tính khoảng cách
         const distance = Phaser.Math.Distance.Between(this.lastX, this.lastY, currentX, currentY);
 
-        // Tối ưu: Nếu di chuyển quá ít (< 1px) thì bỏ qua
-        if (distance < 1) return;
+        // Tối ưu: Nếu di chuyển quá ít (< 5px) thì bỏ qua
+        if (distance < 10) return;
 
         // ✅ Accumulate distance for throttling checks
         const id = rt.getData('id');
@@ -163,8 +167,7 @@ export class PaintManager {
         this.partUncheckedMetrics.set(id, currentDist + distance);
 
         // 3. Thuật toán LERP (Nội suy)
-        // ✅ TỐI ƯU FPS: Giãn khoảng cách vẽ ra một chút.
-        const stepSize = this.brushSize / 4;
+        const stepSize = this.brushSize / 3;
         const steps = Math.ceil(distance / stepSize);
         const offset = this.brushSize / 2;
 
@@ -217,13 +220,23 @@ export class PaintManager {
 
             // ✅ TÁI SỬ DỤNG CANVAS (Không tạo mới)
             const ctxPaint = this.getRecycledContext(this.helperCanvasPaint, snapshot, checkW, checkH);
-            const sourceImg = this.scene.textures.get(key).getSourceImage() as HTMLImageElement;
-            const ctxMask = this.getRecycledContext(this.helperCanvasMask, sourceImg, checkW, checkH);
 
-            if (!ctxPaint || !ctxMask) return;
-
+            if (!ctxPaint) return;
             const paintData = ctxPaint.getImageData(0, 0, checkW, checkH).data;
-            const maskData = ctxMask.getImageData(0, 0, checkW, checkH).data;
+            
+            // ✅ TỐI ƯU HIỆU NĂNG: Lấy Mask Data từ Cache (nếu có) hoặc tính mới 1 lần
+            let maskData = this.maskCache.get(id);
+
+            if (!maskData) {
+                 const sourceImg = this.scene.textures.get(key).getSourceImage() as HTMLImageElement;
+                 const ctxMask = this.getRecycledContext(this.helperCanvasMask, sourceImg, checkW, checkH);
+                 
+                 if (!ctxMask) return;
+                 
+                 // Lưu vào cache dạng TypedArray
+                 maskData = ctxMask.getImageData(0, 0, checkW, checkH).data;
+                 this.maskCache.set(id, maskData);
+            }
 
             let match = 0;
             let total = 0;
@@ -248,6 +261,8 @@ export class PaintManager {
                 // Clear bộ nhớ màu của phần này cho nhẹ
                 this.partColors.delete(id);
                 this.partUncheckedMetrics.delete(id); // Cleanup metrics
+                // Không cần xóa maskCache ngay nếu muốn memory stable, hoặc xóa nếu cần tiết kiệm RAM. 
+                // Với game nhỏ, giữ lại cho đến khi chuyển scene cũng được.
             }
         });
     }

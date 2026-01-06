@@ -87,7 +87,7 @@ export default class Scene1 extends Phaser.Scene {
         });
 
         // ✅ HIỂN THỊ FPS
-        // this.fpsCounter = new FPSCounter(this);
+        //this.fpsCounter = new FPSCounter(this);
     }
 
     update(time: number, delta: number) {
