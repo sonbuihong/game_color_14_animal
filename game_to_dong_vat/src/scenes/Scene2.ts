@@ -283,6 +283,11 @@ export default class Scene2 extends Phaser.Scene {
             hitArea.setData('hintX', hX);
             hitArea.setData('hintY', hY);
             hitArea.setData('originScale', part.scale); // Scale gốc (không đổi)
+            
+            // --- CẬP NHẬT: LƯU HINT POINTS (NẾU CÓ) ---
+            if (part.hintPoints && Array.isArray(part.hintPoints)) {
+                hitArea.setData('hintPoints', part.hintPoints);
+            }
 
             this.unfinishedPartsMap.set(id, hitArea);
             this.totalParts++;
@@ -444,39 +449,79 @@ export default class Scene2 extends Phaser.Scene {
         this.handHint.setOrigin(0, 0);
         this.handHint.setPosition(startX, startY).setAlpha(0).setScale(0.7);
 
+        // --- CẬP NHẬT LOGIC HINT POINTS ---
+        const hintPoints = target?.getData('hintPoints'); // Lấy danh sách điểm gợi ý
+        
+        const tweensChain: any[] = [
+            {
+                alpha: 1,
+                x: startX,
+                y: startY,
+                duration: INTRO.MOVE,
+                ease: 'Power2',
+            },
+            { scale: 0.5, duration: INTRO.TAP, yoyo: true, repeat: 0.7 },
+        ];
+
+        if (hintPoints && hintPoints.length > 0) {
+            // Nếu có danh sách điểm, di chuyển lần lượt qua các điểm
+            const originScale = target?.getData('originScale') || 1;
+            const baseX = target?.x || 0;
+            const baseY = target?.y || 0;
+
+            // Di chuyển đến điểm đầu tiên
+            const firstP = hintPoints[0];
+            const firstDestX = baseX + (firstP.x * originScale);
+            const firstDestY = baseY + (firstP.y * originScale);
+
+            tweensChain.push({ x: firstDestX, y: firstDestY, duration: INTRO.DRAG, delay: 100 });
+
+            // Di chuyển qua các điểm còn lại
+            for (let i = 1; i < hintPoints.length; i++) {
+                const p = hintPoints[i];
+                const destX = baseX + (p.x * originScale);
+                const destY = baseY + (p.y * originScale);
+                tweensChain.push({ x: destX, y: destY, duration: INTRO.DRAG }); // Hoặc duration khác nếu muốn nhanh hơn
+            }
+            
+             // Thêm animation Rub ở điểm cuối cùng hoặc mỗi điểm (ở đây làm đơn giản là rub ở cuối)
+             tweensChain.push({
+                x: '-=30',
+                y: '-=10',
+                duration: INTRO.RUB,
+                yoyo: true,
+                repeat: 3,
+            });
+
+        } else {
+             // Logic cũ: Drag đến center rồi Rub
+             tweensChain.push({ x: destX, y: dragY, duration: INTRO.DRAG, delay: 100 });
+             tweensChain.push({
+                x: '-=30',
+                y: '-=10',
+                duration: INTRO.RUB,
+                yoyo: true,
+                repeat: 3,
+            });
+        }
+
+        tweensChain.push({
+            alpha: 0,
+            duration: 500,
+            onComplete: () => {
+                this.handHint?.setPosition(-200, -200);
+                // Lặp lại nếu Intro chưa kết thúc
+                if (this.isIntroActive)
+                    this.time.delayedCall(1000, () =>
+                        this.runHandTutorial()
+                            );
+                    },
+        });
+
         // Chuỗi Animation: Hiện -> Ấn chọn màu -> Kéo ra -> Di đi di lại (tô) tại đúng vị trí -> Biến mất
         this.tweens.chain({
             targets: this.handHint,
-            tweens: [
-                {
-                    alpha: 1,
-                    x: startX,
-                    y: startY,
-                    duration: INTRO.MOVE,
-                    ease: 'Power2',
-                },
-                { scale: 0.5, duration: INTRO.TAP, yoyo: true, repeat: 0.7 },
-                { x: destX, y: dragY, duration: INTRO.DRAG, delay: 100 },
-                {
-                    x: '-=30',
-                    y: '-=10',
-                    duration: INTRO.RUB,
-                    yoyo: true,
-                    repeat: 3,
-                },
-                {
-                    alpha: 0,
-                    duration: 500,
-                    onComplete: () => {
-                        this.handHint?.setPosition(-200, -200);
-                        // Lặp lại nếu Intro chưa kết thúc
-                        if (this.isIntroActive)
-                            this.time.delayedCall(1000, () =>
-                                this.runHandTutorial()
-                            );
-                    },
-                },
-            ],
+            tweens: tweensChain,
         });
     }
 
@@ -526,15 +571,57 @@ export default class Scene2 extends Phaser.Scene {
 
         // --- CẬP NHẬT: SET ORIGIN (0,0) ĐỂ NGÓN TAY (GÓC TRÁI TRÊN) CHỈ ĐÚNG VÀO ĐIỂM ---
         this.handHint.setOrigin(0, 0);
-        this.handHint.setPosition(destX, destY).setAlpha(0).setScale(0.7);
+
+        // Set vị trí ban đầu (nếu có hint points thì set ở điểm đầu, ko thì destX)
+        // Tuy nhiên logic hint là fade in tại chỗ, nên cần xác định chỗ nào
+        
+        const hintPoints = target?.getData('hintPoints'); // Lấy danh sách điểm gợi ý
+        
+        // Mặc định dùng destX, destY cũ làm điểm xuất phát
+        let startHintX = destX;
+        let startHintY = destY;
+
+        const tweensChain: any[] = [];
+        
+        if (hintPoints && hintPoints.length > 0) {
+            const baseX = target?.x || 0;
+            const baseY = target?.y || 0;
+             // Tính điểm đầu tiên
+            const firstP = hintPoints[0];
+            startHintX = baseX + (firstP.x * originScale);
+            startHintY = baseY + (firstP.y * originScale);
+            
+            // Animation: Hiện ra tại điểm 1
+            tweensChain.push({ alpha: 1, x: startHintX, y: startHintY, duration: IDLE_CFG.FADE_IN });
+
+            // Di chuyển qua các điểm
+            for (let i = 1; i < hintPoints.length; i++) {
+                const p = hintPoints[i];
+                const dX = baseX + (p.x * originScale);
+                const dY = baseY + (p.y * originScale);
+                tweensChain.push({ x: dX, y: dY, duration: IDLE_CFG.SCALE * 2 }); // Di chuyển thong thả
+            }
+
+            // Fade out ở điểm cuối
+             tweensChain.push({ alpha: 0, duration: IDLE_CFG.FADE_OUT });
+
+        } else {
+             // Logic cũ
+             startHintX = destX;
+             startHintY = destY;
+              tweensChain.push({ alpha: 1, x: destX, y: destY, duration: IDLE_CFG.FADE_IN });
+              tweensChain.push({ scale: 0.5, duration: IDLE_CFG.SCALE, yoyo: true, repeat: 3 });
+              tweensChain.push({ alpha: 0, duration: IDLE_CFG.FADE_OUT });
+        }
+
+
+        // Không dùng OFFSET nữa vì muốn chỉ chính xác
+        this.handHint.setPosition(startHintX, startHintY)
+            .setAlpha(0).setScale(0.7);
         
         this.tweens.chain({
             targets: this.handHint,
-            tweens: [
-                { alpha: 1, x: destX, y: destY, duration: IDLE_CFG.FADE_IN },
-                { scale: 0.5, duration: IDLE_CFG.SCALE, yoyo: true, repeat: 3 },
-                { alpha: 0, duration: IDLE_CFG.FADE_OUT }
-            ]
+            tweens: tweensChain
         });
     }
 

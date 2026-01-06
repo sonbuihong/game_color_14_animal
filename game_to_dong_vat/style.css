@@ -84,6 +84,8 @@ canvas {
 #btn-reset {
     top: 2%;
     right: 2%;
+    width: 4.4%;
+    height: auto;
 }
 
 .ui-btn:hover {

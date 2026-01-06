@@ -5,15 +5,15 @@
     "baseX_pct": 0.5, 
     "baseY_pct": 0.585,
     "parts": [
-      { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.9},
-      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.9}
+      { "key": "hama1", "offsetX": 0, "offsetY": 0, "scale": 0.9, "hintPoints": [{"x": -100, "y": 0}]},
+      { "key": "hama2", "offsetX": 0, "offsetY": 0, "scale": 0.9, "hintPoints": [{"x": -300, "y": 250}, {"x": 200, "y": 230}]}
     ]
   },
   "letter": {
     "baseScale": 0.5,
     "outlineKey": "hama_template",
     "frameKey": "hama_frame",
-    "baseX_pct": 0.05,
+    "baseX_pct": 0.07,
     "baseY_pct": 0.28,
     "parts": []
   },
@@ -21,7 +21,7 @@
     "baseScale": 0.6,
     "outlineKey": "hama_name",
     "frameKey": "hama_name_bg",
-    "baseX_pct": 0.085,
+    "baseX_pct": 0.105,
     "baseY_pct": 0.42,
     "parts": []
   }

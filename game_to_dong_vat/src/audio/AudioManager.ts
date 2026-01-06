@@ -18,14 +18,11 @@ const SOUND_MAP: Record<string, SoundConfig> = {
     'sfx-correct_s2': { src: `${BASE_PATH}sfx/correct_color.mp3`, volume: 1.0 },
     'sfx-wrong': { src: `${BASE_PATH}sfx/wrong.mp3`, volume: 0.5 },
     'sfx-click': { src: `${BASE_PATH}sfx/click.mp3`, volume: 0.5 },
-    'voice_item_win': { src: `${BASE_PATH}prompt/item_win.mp3`, volume: 1.0 }, // Đọc đáp án
     'sfx-ting': { src: `${BASE_PATH}sfx/correct.mp3`, volume: 0.6 },
 
     // ---- Prompt Voice ----
     'voice-rotate': { src: `${BASE_PATH}prompt/rotate.mp3`, volume: 0.8 },
-    'instruction': { src: `${BASE_PATH}prompt/instruction_s1.mp3`, volume: 1.0 },
-    'cau_do': { src: `${BASE_PATH}prompt/cau_do.mp3`, volume: 1.0 },
-    'voice_intro_s2': { src: `${BASE_PATH}prompt/instruction_s2.mp3`, volume: 1.0 },
+    'voice_intro_s2': { src: `${BASE_PATH}prompt/instruction_s2.mp3`, volume: 1 },
     'hint': { src: `${BASE_PATH}prompt/hint.mp3`, volume: 1.0 },
 
     // ---- Correct Answer Variations ----
@@ -120,7 +117,7 @@ class AudioManager {
                  return;
             }
 
-            console.log(`[AudioManager] Lazy loading sound: ${id}`);
+            // console.log(`[AudioManager] Lazy loading sound: ${id}`);
             this.sounds[id] = new Howl({
                 src: [config.src],
                 loop: config.loop || false,

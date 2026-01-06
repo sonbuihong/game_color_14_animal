@@ -24,33 +24,22 @@ export default class UIScene extends Phaser.Scene {
         this.createUI();
     }
 
+    private bannerImage!: Phaser.GameObjects.Image;
+    private bannerText!: Phaser.GameObjects.Image;
+
     private createUI() {
         const UI = GameConstants.SCENE2.UI;
         const cx = GameUtils.pctX(this, 0.5);
 
         // Tính toán vị trí Board dựa trên Banner
         const bannerY = GameUtils.pctY(this, UI.BANNER_Y);
-        const bannerHeight = this.textures.get(TextureKeys.S1_Banner).getSourceImage().height * 0.7; // Tỉ lệ 0.7
-
         // Xác định TextureKeys dựa trên SceneKey
-        if(this.sceneKey === SceneKeys.Scene1){
-            let bannerKey = TextureKeys.S1_Banner;
-            let textBannerKey = TextureKeys.S1_BannerText;
-            // Hiển thị Banner và Text
-            this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
-            this.add.image(cx, bannerY, textBannerKey).setScale(0.7).setOrigin(0.5, -1);
-        }
-
-        if (this.sceneKey === SceneKeys.Scene2) {
-            let bannerKey = TextureKeys.S2_Banner;
-            let textBannerKey = TextureKeys.S2_BannerText;
-            // Hiển thị Banner và Text
-            this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
-            this.add.image(cx, bannerY, textBannerKey).setScale(0.7).setOrigin(0.5, -1);
-        }
-
-        // Lưu ý: Bảng được giữ trong Game Scene vì nó đóng khung khu vực vẽ.
-
+        let bannerKey = TextureKeys.S1_Banner;
+        let textBannerKey = TextureKeys.S1_BannerText;
+        // Hiển thị Banner và Text
+        this.bannerImage = this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
+        this.bannerText = this.add.image(cx, bannerY, textBannerKey).setScale(0.7).setOrigin(0.5, -1);
+        
         // Tạo bàn tay gợi ý (ẩn đi, set depth cao nhất để đè lên mọi thứ)
         this.handHint = this.add
             .image(0, 0, TextureKeys.HandHint)
@@ -73,7 +62,6 @@ export default class UIScene extends Phaser.Scene {
         const paletteX = GameUtils.pctX(this, UI.PALETTE_X);
 
         paletteData.forEach((item, i) => {
-            // Logic 1 cột:
             const btnX = paletteX;
             const btnY = startY + i * spacingY;
 
@@ -128,5 +116,10 @@ export default class UIScene extends Phaser.Scene {
             duration: 500,
             ease: 'Back.In'
         });
+    }
+
+    public hideBanners() {
+        if (this.bannerImage) this.bannerImage.destroy();
+        if (this.bannerText) this.bannerText.destroy();
     }
 }

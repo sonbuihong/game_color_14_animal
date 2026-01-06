@@ -43,14 +43,18 @@ import AudioManager from './audio/AudioManager';
 
     // --- 2. XỬ LÝ LOGIC UI & XOAY MÀN HÌNH (Giữ nguyên logic cũ của bạn) ---
     function updateUIButtonScale() {
+        //const container = document.getElementById('game-container')!;
         const resetBtn = document.getElementById('btn-reset') as HTMLImageElement;
         if (!resetBtn) return; // Thêm check null cho an toàn
 
         const w = window.innerWidth;
         const h = window.innerHeight;
 
-        const scale = Math.min(w, h) / 1080;
-        const baseSize = 100; 
+        const MIN_UI_SCALE = 0.45;
+        const MAX_UI_SCALE = 1;
+        const scaleFromViewport = Math.min(w, h) / 720;
+        const scale = Math.min(Math.max(scaleFromViewport, MIN_UI_SCALE), MAX_UI_SCALE);
+        const baseSize = 100;
         const newSize = baseSize * scale;
 
         resetBtn.style.width = `${newSize}px`;

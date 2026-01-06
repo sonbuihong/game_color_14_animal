@@ -56,7 +56,7 @@ export const GameConstants = {
             // /** Khoảng cách giữa các nút màu (Tỉ lệ màn hình) */
             // PALETTE_SPACING: 0.07,
             /** Vị trí X của cột màu (Tỉ lệ màn hình) - Bên phải */
-            PALETTE_X: 0.93, //0.87
+            PALETTE_X: 0.91,
             /** Vị trí Y bắt đầu của nút màu đầu tiên (Tỉ lệ màn hình) */
             PALETTE_START_Y: 0.25, // Bắt đầu từ trên xuống
             /** Khoảng cách dọc giữa các nút màu (Tỉ lệ màn hình) */
