@@ -12,6 +12,7 @@ export class PaintManager {
     // State
     private isErasing: boolean = false;
     private activeRenderTexture: Phaser.GameObjects.RenderTexture | null = null;
+    private activeHitArea: Phaser.GameObjects.Image | null = null;
 
     // ✅ FIX LAG: Biến lưu vị trí cũ để vẽ LERP
     private lastX: number = 0;
@@ -105,20 +106,37 @@ export class PaintManager {
         hitArea.setInteractive({ useHandCursor: true, pixelPerfect: true });
         if (this.ignoreCameraId) hitArea.cameraFilter = this.ignoreCameraId;
 
+        // ✅ NEW: Link layer and ID to hitArea for switching logic
+        hitArea.setData('layer', rt);
+        hitArea.setData('id', uniqueId);
+
         hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            // ✅ TỐI ƯU: Khi chạm vào mới bật mask lên
-            if (!rt.mask) {
-                const storedMask = rt.getData('mask');
-                if (storedMask) rt.setMask(storedMask);
+            // 🔥 CƠ CHẾ CHUYỂN ĐỔI THÔNG MINH (SWITCHING) 🔥
+            if (this.activeHitArea !== hitArea) {
+                if (this.activeHitArea) {
+                    this.freezePart(this.activeHitArea);
+                }
+                this.unfreezePart(hitArea);
+                this.activeHitArea = hitArea;
             }
 
-            this.activeRenderTexture = rt;
+            // Retrieve the CURRENT active layer (it might be a new RT after unfreeze)
+            const activeLayer = hitArea.getData('layer');
+            if (!(activeLayer instanceof Phaser.GameObjects.RenderTexture)) return;
+
+            // ✅ TỐI ƯU: Khi chạm vào mới bật mask lên
+            if (!activeLayer.mask) {
+                const storedMask = activeLayer.getData('mask');
+                if (storedMask) activeLayer.setMask(storedMask);
+            }
+
+            this.activeRenderTexture = activeLayer;
             
             // ✅ QUAN TRỌNG: Lưu vị trí bắt đầu để tính toán LERP
-            this.lastX = pointer.x - rt.x;
-            this.lastY = pointer.y - rt.y;
+            this.lastX = pointer.x - activeLayer.x;
+            this.lastY = pointer.y - activeLayer.y;
 
-            this.paint(pointer, rt);
+            this.paint(pointer, activeLayer);
         });
 
         return hitArea;
@@ -149,6 +167,76 @@ export class PaintManager {
         }
     }
 
+    private freezePart(hitArea: Phaser.GameObjects.Image) {
+        const currentLayer = hitArea.getData('layer');
+        if (currentLayer instanceof Phaser.GameObjects.RenderTexture) {
+            const uniqueId = hitArea.getData('id');
+            const key = `painted_tex_${uniqueId}`;
+            
+            // Save current RT content to Texture Manager
+            if (this.scene.textures.exists(key)) {
+                this.scene.textures.remove(key);
+            }
+            currentLayer.saveTexture(key);
+            
+            // Create static Image replacement
+            const img = this.scene.add.image(currentLayer.x, currentLayer.y, key);
+            img.setOrigin(0, 0).setDepth(10);
+            
+            // Transfer Mask
+            const storedMask = currentLayer.getData('mask');
+            if (storedMask) img.setMask(storedMask);
+            if (this.ignoreCameraId) img.cameraFilter = this.ignoreCameraId;
+            
+            // Transfer Data
+            img.setData('id', uniqueId);
+            img.setData('key', currentLayer.getData('key'));
+            img.setData('isFinished', currentLayer.getData('isFinished'));
+            img.setData('mask', storedMask);
+            
+            // Update link
+            hitArea.setData('layer', img);
+            
+            // Destroy heavy RT
+            currentLayer.destroy();
+        }
+    }
+
+    private unfreezePart(hitArea: Phaser.GameObjects.Image) {
+        const currentLayer = hitArea.getData('layer');
+        
+        // If it's a static Image, convert back to RT
+        if (currentLayer instanceof Phaser.GameObjects.Image) {
+            const width = currentLayer.width;
+            const height = currentLayer.height;
+            const x = currentLayer.x;
+            const y = currentLayer.y;
+            
+            const rt = this.scene.add.renderTexture(x, y, width, height);
+            rt.setOrigin(0, 0).setDepth(10);
+            
+            // Draw the frozen texture onto the new RT
+            rt.draw(currentLayer, 0, 0);
+            
+            // Restore context
+            const storedMask = currentLayer.getData('mask');
+            if (storedMask) rt.setMask(storedMask);
+            if (this.ignoreCameraId) rt.cameraFilter = this.ignoreCameraId;
+            
+            // Restore Data
+            rt.setData('id', currentLayer.getData('id'));
+            rt.setData('key', currentLayer.getData('key'));
+            rt.setData('isFinished', currentLayer.getData('isFinished'));
+            rt.setData('mask', storedMask);
+            
+            // Update link
+            hitArea.setData('layer', rt);
+            
+            // Cleanup static Image
+            currentLayer.destroy();
+        }
+    }
+
     // ✅ HÀM PAINT MỚI: DÙNG LERP ĐỂ VẼ MƯỢT
     private paint(pointer: Phaser.Input.Pointer, rt: Phaser.GameObjects.RenderTexture) {
         // 1. Lấy toạ độ hiện tại (Local)
@@ -167,8 +255,9 @@ export class PaintManager {
         this.partUncheckedMetrics.set(id, currentDist + distance);
 
         // 3. Thuật toán LERP (Nội suy)
-        const stepSize = this.brushSize / 3;
-        const steps = Math.ceil(distance / stepSize);
+        const stepSize = this.brushSize * 0.65;
+        let steps = Math.ceil(distance / stepSize);
+        if (steps > 50) steps = 50;
         const offset = this.brushSize / 2;
 
         for (let i = 0; i < steps; i++) {
