@@ -1,9 +1,6 @@
 import Phaser from 'phaser';
 import Scene1 from './scenes/Scene1';
-import Scene2 from './scenes/Scene2';
 import PreloadScene from './scenes/PreloadScene';
-import PreloadScene1 from './scenes/PreloadScene1';
-import PreloadScene2 from './scenes/PreloadScene2';
 import UIScene from './scenes/UIScene';
 
 import EndGameScene from './scenes/EndgameScene';
@@ -24,7 +21,7 @@ import AudioManager from './audio/AudioManager';
         width: 1920,
         height: 1080,
         parent: 'game-container',
-        scene: [PreloadScene, PreloadScene1, PreloadScene2, Scene1, Scene2, EndGameScene, UIScene],
+        scene: [PreloadScene, Scene1, EndGameScene, UIScene],
         backgroundColor: '#ffffff',
         scale: {
             mode: Phaser.Scale.FIT,       // Dùng FIT để co giãn giữ tỉ lệ

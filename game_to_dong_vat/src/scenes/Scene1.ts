@@ -195,7 +195,7 @@ export default class Scene1 extends Phaser.Scene {
     // =================================================================
 
     private createUI() {
-        const UI = GameConstants.SCENE2.UI;
+        const UI = GameConstants.SCENE1.UI;
         const cx = GameUtils.pctX(this, 0.5);
         const scl = [1, 0.72];
 
@@ -360,7 +360,7 @@ export default class Scene1 extends Phaser.Scene {
             targets: rt,
             alpha: 0.8,
             yoyo: true,
-            duration: GameConstants.SCENE2.TIMING.AUTO_FILL,
+            duration: GameConstants.SCENE1.TIMING.AUTO_FILL,
             repeat: 2,
         });
 
@@ -376,7 +376,7 @@ export default class Scene1 extends Phaser.Scene {
                 if (uiScene.hideBanners) uiScene.hideBanners();
             }
 
-            this.time.delayedCall(GameConstants.SCENE2.TIMING.WIN_DELAY, () =>
+            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () =>
                 this.scene.start(SceneKeys.EndGame)
             );
         }
@@ -389,7 +389,7 @@ export default class Scene1 extends Phaser.Scene {
 
     public restartIntro() {
         this.stopIntro();
-        this.time.delayedCall(GameConstants.SCENE2.TIMING.RESTART_INTRO, () =>
+        this.time.delayedCall(GameConstants.SCENE1.TIMING.RESTART_INTRO, () =>
             this.playIntroSequence()
         );
     }
@@ -398,7 +398,7 @@ export default class Scene1 extends Phaser.Scene {
         this.isIntroActive = true;
         playVoiceLocked(null, 'voice_intro_s2');
         // Đợi 1 chút rồi chạy animation tay hướng dẫn
-        this.time.delayedCall(GameConstants.SCENE2.TIMING.INTRO_DELAY, () => {
+        this.time.delayedCall(GameConstants.SCENE1.TIMING.INTRO_DELAY, () => {
             if (this.isIntroActive) this.runHandTutorial();
         });
     }
@@ -435,7 +435,7 @@ export default class Scene1 extends Phaser.Scene {
             destY = target.y + (hY * originScale);
         } else {
             // Fallback nếu không có part nào (hiếm gặp)
-            const UI = GameConstants.SCENE2.UI;
+            const UI = GameConstants.SCENE1.UI;
             destX = GameUtils.pctX(this, UI.HAND_INTRO_END_X);
             destY = GameUtils.pctY(this, UI.HAND_INTRO_END_Y);
         }
@@ -458,8 +458,8 @@ export default class Scene1 extends Phaser.Scene {
         //     });
         // }
 
-        const UI = GameConstants.SCENE2.UI;
-        const INTRO = GameConstants.SCENE2.INTRO_HAND;
+        const UI = GameConstants.SCENE1.UI;
+        const INTRO = GameConstants.SCENE1.INTRO_HAND;
 
         // Tính toán tọa độ nút màu đầu tiên (Vertical Layout)
         const spacingY = GameUtils.pctX(this, UI.PALETTE_SPACING_Y);

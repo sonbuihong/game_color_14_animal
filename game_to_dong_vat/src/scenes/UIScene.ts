@@ -28,7 +28,7 @@ export default class UIScene extends Phaser.Scene {
     private bannerText!: Phaser.GameObjects.Image;
 
     private createUI() {
-        const UI = GameConstants.SCENE2.UI;
+        const UI = GameConstants.SCENE1.UI;
         const cx = GameUtils.pctX(this, 0.5);
 
         // Tính toán vị trí Board dựa trên Banner
@@ -51,11 +51,9 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private createPalette() {
-        const UI = GameConstants.SCENE2.UI;
+        const UI = GameConstants.SCENE1.UI;
         // Chọn bộ màu dựa trên SceneKey
-        const paletteData = (this.sceneKey === SceneKeys.Scene2) 
-            ? GameConstants.PALETTE_DATA_S2 
-            : GameConstants.PALETTE_DATA;
+        const paletteData = GameConstants.PALETTE_DATA;
 
         const spacingY = GameUtils.pctY(this, UI.PALETTE_SPACING_Y);
         const startY = GameUtils.pctY(this, UI.PALETTE_START_Y);

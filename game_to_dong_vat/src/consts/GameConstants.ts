@@ -17,15 +17,7 @@ export const GameConstants = {
         { key: TextureKeys.BtnCream, color: 0xFAE3BA },
         // { key: TextureKeys.BtnBlack, color: 0x000000 },
     ],
-    PALETTE_DATA_S2: [
-        { key: TextureKeys.S2_BtnGreen1, color: 0x5EA455 },// PaleGreen
-        { key: TextureKeys.S2_BtnGreen2, color: 0xB2CB4B }, // LimeGreen
-        // { key: TextureKeys.S2_BtnGreen3, color: 0x228B22 }, // ForestGreen
-        { key: TextureKeys.S2_BtnWhite, color: 0xFFFFFF },
-        { key: TextureKeys.S2_BtnGreen4, color: 0x387440 }, // DarkGreen
-        { key: TextureKeys.S2_BtnCream, color: 0xFDFCDC },
-        // { key: TextureKeys.S2_BtnBlack, color: 0x000000 },      
-    ],
+
     DEBUG_MODE: true, // Set false khi release
     IDLE: {
         /** Thời gian chờ trước khi hiện gợi ý (ms). 10000 = 10 giây */
@@ -43,9 +35,10 @@ export const GameConstants = {
     },
 
     // =========================================
-    // SCENE 2: TÔ MÀU
     // =========================================
-    SCENE2: {
+    // SCENE 1: TÔ MÀU
+    // =========================================
+    SCENE1: {
         UI: {
             BANNER_Y: 0.001,
             // BẢNG
