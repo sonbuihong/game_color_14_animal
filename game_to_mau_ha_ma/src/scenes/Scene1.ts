@@ -54,10 +54,16 @@ export default class Scene1 extends Phaser.Scene {
      * Khởi tạo lại dữ liệu khi Scene bắt đầu (hoặc Restart)
      * QUAN TRỌNG: Phải clear các Map/Set để tránh lỗi "Zombie Object" (tham chiếu đến object cũ đã bị destroy)
      */
-    init() {
+    init(data?: { isRestart: boolean }) {
         this.unfinishedPartsMap.clear();
         this.finishedParts.clear();
         this.totalParts = 0;
+
+        if (data?.isRestart) {
+            this.isWaitingForIntroStart = false;
+        } else {
+            this.isWaitingForIntroStart = true;
+        }
     }
 
     create() {
@@ -88,6 +94,17 @@ export default class Scene1 extends Phaser.Scene {
 
         // ✅ HIỂN THỊ FPS
         // this.fpsCounter = new FPSCounter(this);
+
+        // Nếu là restart (không cần chờ tap), chạy intro luôn
+        if (!this.isWaitingForIntroStart) {
+            const soundManager = this.sound as Phaser.Sound.WebAudioSoundManager;
+            if (soundManager.context && soundManager.context.state === 'suspended') {
+                soundManager.context.resume();
+            }
+            setTimeout(() => {
+                this.playIntroSequence();
+            }, 500);
+        }
     }
 
     update(time: number, delta: number) {

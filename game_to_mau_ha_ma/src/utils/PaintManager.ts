@@ -215,15 +215,18 @@ export class PaintManager {
             const rt = this.scene.add.renderTexture(x, y, width, height);
             rt.setOrigin(0, 0).setDepth(10);
             
-            // Draw the frozen texture onto the new RT
+            // Xóa mask trước khi vẽ để đảm bảo nội dung được sao chép.
+            currentLayer.clearMask();
+            
+            // Vẽ (render) texture đã được đóng băng lên RenderTexture (RT) mới
             rt.draw(currentLayer, 0, 0);
             
-            // Restore context
+            // Khôi phục context (ngữ cảnh vẽ / trạng thái render).
             const storedMask = currentLayer.getData('mask');
             if (storedMask) rt.setMask(storedMask);
             if (this.ignoreCameraId) rt.cameraFilter = this.ignoreCameraId;
             
-            // Restore Data
+            // Khôi phục dữ liệu.
             rt.setData('id', currentLayer.getData('id'));
             rt.setData('key', currentLayer.getData('key'));
             rt.setData('isFinished', currentLayer.getData('isFinished'));
@@ -237,7 +240,7 @@ export class PaintManager {
         }
     }
 
-    // ✅ HÀM PAINT MỚI: DÙNG LERP ĐỂ VẼ MƯỢT
+    // HÀM PAINT MỚI: DÙNG LERP ĐỂ VẼ MƯỢT
     private paint(pointer: Phaser.Input.Pointer, rt: Phaser.GameObjects.RenderTexture) {
         // 1. Lấy toạ độ hiện tại (Local)
         const currentX = pointer.x - rt.x;
@@ -249,7 +252,7 @@ export class PaintManager {
         // Tối ưu: Nếu di chuyển quá ít (< 5px) thì bỏ qua
         if (distance < 10) return;
 
-        // ✅ Accumulate distance for throttling checks
+        // Tích lũy khoảng cách để kiểm tra tiến độ
         const id = rt.getData('id');
         const currentDist = this.partUncheckedMetrics.get(id) || 0;
         this.partUncheckedMetrics.set(id, currentDist + distance);
@@ -278,7 +281,7 @@ export class PaintManager {
         } else {
             rt.draw(this.brushTexture, currentX - offset, currentY - offset, 1.0, this.brushColor);
             
-            // ✅ MOVED OUTSIDE OF LOOP: color tracking only triggers ONCE per paint action
+            // MOVED OUTSIDE OF LOOP: color tracking only triggers ONCE per paint action
             // Optimization: checking set has/add is fast, but doing it inside loop is wasteful.
             // Since activeRenderTexture is set, we do it here (once per pointermove event).
             if (!this.partColors.has(id)) {
@@ -292,7 +295,7 @@ export class PaintManager {
         this.lastY = currentY;
     }
 
-    // ✅ HÀM CHECK PROGRESS MỚI: TỐI ƯU BỘ NHỚ
+    // HÀM CHECK PROGRESS MỚI: TỐI ƯU BỘ NHỚ
     private checkProgress(rt: Phaser.GameObjects.RenderTexture) {
         if (rt.getData('isFinished')) return;
         
@@ -307,13 +310,13 @@ export class PaintManager {
             const checkW = Math.floor(w / 4);
             const checkH = Math.floor(h / 4);
 
-            // ✅ TÁI SỬ DỤNG CANVAS (Không tạo mới)
+            // Tái sử dụng Canvas (Không tạo mới)
             const ctxPaint = this.getRecycledContext(this.helperCanvasPaint, snapshot, checkW, checkH);
 
             if (!ctxPaint) return;
             const paintData = ctxPaint.getImageData(0, 0, checkW, checkH).data;
             
-            // ✅ TỐI ƯU HIỆU NĂNG: Lấy Mask Data từ Cache (nếu có) hoặc tính mới 1 lần
+            // TỐI ƯU HIỆU NĂNG: Lấy Mask Data từ Cache (nếu có) hoặc tính mới 1 lần
             let maskData = this.maskCache.get(id);
 
             if (!maskData) {
@@ -343,7 +346,7 @@ export class PaintManager {
             if (percentage > GameConstants.PAINT.WIN_PERCENT) {
                 rt.setData('isFinished', true);
 
-                // ✅ GỬI DANH SÁCH MÀU VỀ SCENE
+                // GỬI DANH SÁCH MÀU VỀ SCENE
                 const usedColors = this.partColors.get(id) || new Set([this.brushColor]);
                 this.onPartComplete(id, rt, usedColors);
                 

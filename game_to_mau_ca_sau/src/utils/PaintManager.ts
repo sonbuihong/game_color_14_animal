@@ -215,6 +215,9 @@ export class PaintManager {
             const rt = this.scene.add.renderTexture(x, y, width, height);
             rt.setOrigin(0, 0).setDepth(10);
             
+            // Clear mask
+            currentLayer.clearMask();
+
             // Draw the frozen texture onto the new RT
             rt.draw(currentLayer, 0, 0);
             
