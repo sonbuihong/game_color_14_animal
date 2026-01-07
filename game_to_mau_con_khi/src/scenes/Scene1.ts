@@ -69,7 +69,7 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     create() {
-        document.title = "Game Tô Màu Con Cá Sấu";
+        document.title = "Game Tô Màu Con Khỉ";
         showGameButtons();
 
         this.setupSystem(); // Cài đặt hệ thống (Paint, Idle)
