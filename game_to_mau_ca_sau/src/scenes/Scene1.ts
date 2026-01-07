@@ -56,13 +56,20 @@ export default class Scene1 extends Phaser.Scene {
      * Khởi tạo lại dữ liệu khi Scene bắt đầu (hoặc Restart)
      * QUAN TRỌNG: Phải clear các Map/Set để tránh lỗi "Zombie Object" (tham chiếu đến object cũ đã bị destroy)
      */
-    init() {
+    init(data?: { isRestart: boolean }) {
         this.unfinishedPartsMap.clear();
         this.finishedParts.clear();
         this.totalParts = 0;
+
+        if (data?.isRestart) {
+            this.isWaitingForIntroStart = false;
+        } else {
+            this.isWaitingForIntroStart = true;
+        }
     }
 
     create() {
+        document.title = "Game Tô Màu Con Cá Sấu";
         showGameButtons();
 
         this.setupSystem(); // Cài đặt hệ thống (Paint, Idle)
@@ -88,7 +95,18 @@ export default class Scene1 extends Phaser.Scene {
         });
 
         // ✅ HIỂN THỊ FPS
-        this.fpsCounter = new FPSCounter(this);
+        // this.fpsCounter = new FPSCounter(this);
+
+        // Nếu là restart (không cần chờ tap), chạy intro luôn
+        if (!this.isWaitingForIntroStart) {
+            const soundManager = this.sound as Phaser.Sound.WebAudioSoundManager;
+            if (soundManager.context && soundManager.context.state === 'suspended') {
+                soundManager.context.resume();
+            }
+            setTimeout(() => {
+                this.playIntroSequence();
+            }, 500);
+        }
     }
 
     update(time: number, delta: number) {
@@ -164,6 +182,7 @@ export default class Scene1 extends Phaser.Scene {
                 if (soundManager.context && soundManager.context.state === 'suspended') {
                     soundManager.context.resume();
                 }
+                // AudioManager.unlockAudio(); // ✅ Unlock Howler Audio
 
                 this.playIntroSequence();
                 return;
@@ -199,6 +218,7 @@ export default class Scene1 extends Phaser.Scene {
     private createUI() {
         const UI = GameConstants.SCENE1.UI;
         const cx = GameUtils.pctX(this, 0.5);
+        const scl = [1, 0.72];
 
         // Tính toán vị trí Board dựa trên Banner
         // const bannerY = GameUtils.pctY(this, UI.BANNER_Y);
@@ -208,15 +228,17 @@ export default class Scene1 extends Phaser.Scene {
         const board = this.add
             .image(cx, boardY, TextureKeys.S1_Board)
             .setOrigin(0.5, 0)
-            .setScale(1, 0.72)
+            .setScale(scl[0], scl[1])
             .setDepth(0);
+
+        board.displayWidth = GameUtils.getW(this) * 0.95;
 
         const boardRightX = board.x + board.displayWidth / 2;
         const boardCenterY = board.y + board.displayHeight / 2;
         const rightBoard = this.add
             .image(boardRightX - 8, boardCenterY, TextureKeys.BoardRight)
             .setOrigin(1, 0.5)
-            .setScale(1, 0.72)
+            .setScale(scl[0], scl[1])
             .setDepth(10);
     }
 
@@ -247,7 +269,7 @@ export default class Scene1 extends Phaser.Scene {
 
         // Chỉ hiện outline
         this.add.image(cx, cy, config.outlineKey)
-            .setOrigin(0.5, 0.5)
+            .setOrigin(0.56, 0.5)
             .setScale(config.baseScale).setDepth(100);
     }
 
@@ -366,10 +388,17 @@ export default class Scene1 extends Phaser.Scene {
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
             AudioManager.play('sfx-correct_s2');
-            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () => {
-                this.scene.stop(SceneKeys.UI);
-                this.scene.start(SceneKeys.EndGame);
-            });
+            
+            // Xóa UI (Nút màu & Banner)
+            const uiScene = this.scene.get(SceneKeys.UI) as any;
+            if (uiScene) {
+                if (uiScene.hidePalette) uiScene.hidePalette();
+                if (uiScene.hideBanners) uiScene.hideBanners();
+            }
+
+            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () =>
+                this.scene.start(SceneKeys.EndGame)
+            );
         }
     }
 
@@ -431,22 +460,22 @@ export default class Scene1 extends Phaser.Scene {
         }
 
         // 2. Visual: Nhấp nháy bộ phận đó (nếu có) để gây chú ý
-        if (target) {
-            this.activeHintTarget = target;
-            this.tweens.add({
-                targets: target, 
-                alpha: { from: 0.01, to: 0.8 },
-                scale: { from: target.getData('originScale'), to: target.getData('originScale') * 1.005 },
-                duration: GameConstants.IDLE.FADE_IN, 
-                yoyo: true, 
-                repeat: 2,
-                onComplete: () => {
-                    if(this.activeHintTarget === target){
-                        this.activeHintTarget = null;
-                    }
-                }
-            });
-        }
+        // if (target) {
+        //     this.activeHintTarget = target;
+        //     this.tweens.add({
+        //         targets: target, 
+        //         alpha: { from: 0.01, to: 0.8 },
+        //         scale: { from: target.getData('originScale'), to: target.getData('originScale') * 1.005 },
+        //         duration: GameConstants.IDLE.FADE_IN, 
+        //         yoyo: true, 
+        //         repeat: 2,
+        //         onComplete: () => {
+        //             if (this.activeHintTarget === target) {
+        //                  this.activeHintTarget = null;
+        //             }
+        //         }
+        //     });
+        // }
 
         const UI = GameConstants.SCENE1.UI;
         const INTRO = GameConstants.SCENE1.INTRO_HAND;
@@ -456,12 +485,7 @@ export default class Scene1 extends Phaser.Scene {
         const startY = GameUtils.pctY(this, UI.PALETTE_START_Y); 
         const paletteX = GameUtils.pctX(this, UI.PALETTE_X);
 
-        // Nút đầu tiên nằm ở đỉnh cột
-        const firstBtnX = paletteX;
-        const firstBtnY = startY;
-
-        const startX = firstBtnX + 20;
-        const startYPos = firstBtnY + 20; // Tránh trùng biến startY
+        const startX = paletteX;
         const dragY = destY + 30; // Kéo tay xuống thấp hơn điểm đích một chút để không che mất
 
         if (!this.handHint) return;
@@ -496,15 +520,23 @@ export default class Scene1 extends Phaser.Scene {
 
             tweensChain.push({ x: firstDestX, y: firstDestY, duration: INTRO.DRAG, delay: 100 });
 
+            // Rub tại điểm đầu tiên
+            tweensChain.push({
+                x: '-=30',
+                y: '-=10',
+                duration: INTRO.RUB,
+                yoyo: true,
+                repeat: 3,
+            });
+
             // Di chuyển qua các điểm còn lại
             for (let i = 1; i < hintPoints.length; i++) {
                 const p = hintPoints[i];
                 const destX = baseX + (p.x * originScale);
                 const destY = baseY + (p.y * originScale);
-                tweensChain.push({ x: destX, y: destY, duration: INTRO.DRAG }); // Hoặc duration khác nếu muốn nhanh hơn
-            }
+                tweensChain.push({ x: destX, y: destY, duration: INTRO.DRAG });
             
-             // Thêm animation Rub ở điểm cuối cùng hoặc mỗi điểm (ở đây làm đơn giản là rub ở cuối)
+                // Rub tại các điểm tiếp theo
              tweensChain.push({
                 x: '-=30',
                 y: '-=10',
@@ -512,6 +544,7 @@ export default class Scene1 extends Phaser.Scene {
                 yoyo: true,
                 repeat: 3,
             });
+            }
 
         } else {
              // Logic cũ: Drag đến center rồi Rub
@@ -584,8 +617,8 @@ export default class Scene1 extends Phaser.Scene {
         const originScale = target.getData('originScale') || 1; 
 
         // Tính tọa độ đích dựa trên scale gốc
-        const destX = target.x + (hX * originScale);
-        const destY = target.y + (hY * originScale);
+        let destX = target.x + (hX * originScale);
+        let destY = target.y + (hY * originScale);
 
         if (!this.handHint) return;
 
@@ -606,34 +639,41 @@ export default class Scene1 extends Phaser.Scene {
         if (hintPoints && hintPoints.length > 0) {
             const baseX = target?.x || 0;
             const baseY = target?.y || 0;
+            
              // Tính điểm đầu tiên
             const firstP = hintPoints[0];
             startHintX = baseX + (firstP.x * originScale);
             startHintY = baseY + (firstP.y * originScale);
             
-            // Animation: Hiện ra tại điểm 1
+            // 1. Hiện ra tại điểm đầu tiên
             tweensChain.push({ alpha: 1, x: startHintX, y: startHintY, duration: IDLE_CFG.FADE_IN });
+            // 2. Tap tại điểm đầu tiên
+            tweensChain.push({ scale: 0.5, duration: IDLE_CFG.SCALE, yoyo: true, repeat: 3 });
 
-            // Di chuyển qua các điểm
+            // 3. Di chuyển và Tap ở các điểm tiếp theo
             for (let i = 1; i < hintPoints.length; i++) {
                 const p = hintPoints[i];
                 const dX = baseX + (p.x * originScale);
                 const dY = baseY + (p.y * originScale);
-                tweensChain.push({ x: dX, y: dY, duration: IDLE_CFG.SCALE * 2 }); // Di chuyển thong thả
+                
+                // Di chuyển đến
+                tweensChain.push({ x: dX, y: dY, duration: IDLE_CFG.SCALE * 2 });
+                // Tap
+                tweensChain.push({ scale: 0.5, duration: IDLE_CFG.SCALE, yoyo: true, repeat: 3 });
             }
 
-            // Fade out ở điểm cuối
+            // 4. Biến mất
              tweensChain.push({ alpha: 0, duration: IDLE_CFG.FADE_OUT });
 
         } else {
              // Logic cũ
              startHintX = destX;
              startHintY = destY;
+
               tweensChain.push({ alpha: 1, x: destX, y: destY, duration: IDLE_CFG.FADE_IN });
               tweensChain.push({ scale: 0.5, duration: IDLE_CFG.SCALE, yoyo: true, repeat: 3 });
               tweensChain.push({ alpha: 0, duration: IDLE_CFG.FADE_OUT });
         }
-
 
         // Không dùng OFFSET nữa vì muốn chỉ chính xác
         this.handHint.setPosition(startHintX, startHintY)

@@ -9,11 +9,11 @@ export const GameConstants = {
     // CẤU HÌNH CHUNG (SYSTEM)
     // =========================================
     PALETTE_DATA: [
-        { key: TextureKeys.BtnS2Green1, color: 0x5EA455 },// PaleGreen
-        { key: TextureKeys.BtnS2Green2, color: 0xB2CB4B }, // LimeGreen
-        { key: TextureKeys.BtnS2White, color: 0xFFFFFF },
-        { key: TextureKeys.BtnS2Green4, color: 0x387440 }, // DarkGreen
-        { key: TextureKeys.BtnS2Cream, color: 0xFDFCDC },    
+        { key: TextureKeys.BtnS1Green1, color: 0x5EA455 },// PaleGreen
+        { key: TextureKeys.BtnS1Green2, color: 0xB2CB4B }, // LimeGreen
+        { key: TextureKeys.BtnS1White, color: 0xFFFFFF },
+        { key: TextureKeys.BtnS1Green4, color: 0x387440 }, // DarkGreen
+        { key: TextureKeys.BtnS1Cream, color: 0xFDFCDC },    
     ],
     DEBUG_MODE: true, // Set false khi release
     IDLE: {

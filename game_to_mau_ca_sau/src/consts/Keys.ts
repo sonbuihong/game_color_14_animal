@@ -30,16 +30,13 @@ export enum TextureKeys {
     S1_Casau_Name_Bg = 'ca_sau_name_bg',
     S1_Casau_Outline = 'ca_sau_outline',
     S1_Casau_1 = 'ca_sau_1',
-    S1_Casau_2 = 'ca_sau_2',
-    S1_Casau_3 = 'ca_sau_3',
-    S1_Casau_4 = 'ca_sau_4',
 
     // Các nút màu Scene 1 (Formerly S2 Colors)
-    BtnS2Green1 = 's2_btn_green1',
-    BtnS2Green2 = 's2_btn_green2',
-    BtnS2Green4 = 's2_btn_green4',
-    BtnS2White = 's2_btn_white',
-    BtnS2Cream = 's2_btn_cream',
+    BtnS1Green1 = 's1_btn_green1',
+    BtnS1Green2 = 's1_btn_green2',
+    BtnS1Green4 = 's1_btn_green4',
+    BtnS1White = 's1_btn_white',
+    BtnS1Cream = 's1_btn_cream',
 
     // --- End Game ---
     End_Icon = 'icon_end',

@@ -131,8 +131,6 @@ export default class Scene1 extends Phaser.Scene {
             this.handlePartComplete(id, rt, usedColors);
         });
 
-
-
         // Cài đặt Idle Manager: Khi rảnh quá lâu thì gọi showHint()
         this.idleManager = new IdleManager(GameConstants.IDLE.THRESHOLD, () =>
             this.showHint()
@@ -235,6 +233,7 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     private createDecorativeLetter(config: any) {
+        if (!config) return;
         const cx = GameUtils.pctX(this, config.baseX_pct);
         const cy = GameUtils.pctY(this, config.baseY_pct);
         
@@ -380,7 +379,6 @@ export default class Scene1 extends Phaser.Scene {
                 this.scene.start(SceneKeys.EndGame)
             );
         }
-        
     }
 
     // =================================================================
