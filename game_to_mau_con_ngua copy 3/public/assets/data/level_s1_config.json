@@ -1,0 +1,32 @@
+{
+  "teacher": {
+    "baseScale": 0.75,
+    "outlineKey": "outline",
+    "baseX_pct": 0.5,
+    "baseY_pct": 0.55,
+    "parts": [
+      { "key": "1", "offsetX": 0, "offsetY": 0, "scale": 0.75, 
+        "hintPoints": [{"x": 350, "y": -300}]},
+      { "key": "2", "offsetX": 0, "offsetY": 0, "scale": 0.75, 
+        "hintPoints": [{"x": 0, "y": 0}]},
+      { "key": "3", "offsetX": 0, "offsetY": 0, "scale": 0.75, 
+        "hintPoints": [{"x": 0, "y": 0}]}
+    ]
+  },
+  "letter": {
+    "baseScale": 0.6,
+    "outlineKey": "template",
+    "frameKey": "frame",
+    "baseX_pct": 0.11,
+    "baseY_pct": 0.24,
+    "parts": []
+  },
+  "name": {
+    "baseScale": 0.6,
+    "outlineKey": "name",
+    "frameKey": "name_bg",
+    "baseX_pct": 0.1045,
+    "baseY_pct": 0.35,
+    "parts": []
+  }
+}
