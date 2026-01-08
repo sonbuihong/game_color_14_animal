@@ -67,76 +67,76 @@ export default class EndGameScene extends Phaser.Scene {
                 ease: 'Sine.easeInOut',
             });
         
-        //  === NÚT CHỨC NĂNG ===
-        const btnScale = Math.min(w, h) / 1280;
-        const spacing = 250 * btnScale;
-        
-        // Nút chơi lại (Bên trái)
-        const replayBtn = this.add
-            .image(w / 2 - spacing, h / 2 + h * 0.2, 'btn_reset')
-            .setOrigin(0.5)
-            .setScale(btnScale)
-            .setDepth(101)
-            .setInteractive({ useHandCursor: true });
-        
-        replayBtn.on('pointerdown', () => {
-            this.time.removeAllEvents();
-            this.sound.stopAll();
-            AudioManager.stopAll();
-            AudioManager.play('sfx-click');
-            this.stopConfetti(); //
-            showGameButtons();
-            this.scene.start('PreloadScene');
-        });
+            //  === NÚT CHỨC NĂNG ===
+            const btnScale = Math.min(w, h) / 1280;
+            const spacing = 250 * btnScale;
+            
+            // Nút chơi lại (Bên trái)
+            const replayBtn = this.add
+                .image(w / 2 - spacing, h / 2 + h * 0.2, 'btn_reset')
+                .setOrigin(0.5)
+                .setScale(btnScale)
+                .setDepth(101)
+                .setInteractive({ useHandCursor: true });
+            
+            replayBtn.on('pointerdown', () => {
+                this.time.removeAllEvents();
+                this.sound.stopAll();
+                AudioManager.stopAll();
+                AudioManager.play('sfx-click');
+                this.stopConfetti(); //
+                showGameButtons();
+                this.scene.start('PreloadScene');
+            });
 
-        // 4. Nút Exit
-        const exitBtn = this.add
-            .image(w / 2 + spacing, h / 2 + h * 0.2, 'btn_exit')
-            .setOrigin(0.5)
-            .setScale(btnScale)
-            .setDepth(101)
-            .setInteractive({ useHandCursor: true });
+            // 4. Nút Exit
+            const exitBtn = this.add
+                .image(w / 2 + spacing, h / 2 + h * 0.2, 'btn_exit')
+                .setOrigin(0.5)
+                .setScale(btnScale)
+                .setDepth(101)
+                .setInteractive({ useHandCursor: true });
 
-        exitBtn.on('pointerdown', () => {
-            AudioManager.play('sfx-click');
-            AudioManager.stopAll();
-            this.stopConfetti(); //
-            this.scene.start('MenuScene');
+            exitBtn.on('pointerdown', () => {
+                AudioManager.play('sfx-click');
+                AudioManager.stopAll();
+                this.stopConfetti(); //
+                this.scene.start('MenuScene');
 
-            // ✅ Gửi COMPLETE cho Game Hub
-            const host = (window as any).irukaHost;
-            const state = (window as any).irukaGameState || {};
+                // ✅ Gửi COMPLETE cho Game Hub
+                const host = (window as any).irukaHost;
+                const state = (window as any).irukaGameState || {};
 
-            if (host && typeof host.complete === 'function') {
-                const timeMs = state.startTime
-                    ? Date.now() - state.startTime
-                    : 0;
-                const score = state.currentScore || 0;
+                if (host && typeof host.complete === 'function') {
+                    const timeMs = state.startTime
+                        ? Date.now() - state.startTime
+                        : 0;
+                    const score = state.currentScore || 0;
 
-                host.complete({
-                    score,
-                    timeMs,
-                    extras: {
-                        reason: 'user_exit', // cho hub biết là user tự thoát
-                    },
-                });
-            } else {
-                // Fallback: nếu chạy ngoài Game Hub (dev standalone)
-                this.scene.start('LessonSelectScene');
-            }
-        });
+                    host.complete({
+                        score,
+                        timeMs,
+                        extras: {
+                            reason: 'user_exit', // cho hub biết là user tự thoát
+                        },
+                    });
+                } else {
+                    // Fallback: nếu chạy ngoài Game Hub (dev standalone)
+                    this.scene.start('LessonSelectScene');
+                }
+            });
 
 
 
-        // === optional: hover effect ===
-        [replayBtn, exitBtn].forEach((btn) => {
-            btn.on('pointerover', () => btn.setScale(btnScale * 1.1));
-            btn.on('pointerout', () => btn.setScale(btnScale));
-        });
+            // === optional: hover effect ===
+            [replayBtn, exitBtn].forEach((btn) => {
+                btn.on('pointerover', () => btn.setScale(btnScale * 1.1));
+                btn.on('pointerout', () => btn.setScale(btnScale));
+            });
 
-        hideGameButtons();
-        this.createConfettiEffect();
-    }      
+            hideGameButtons();
+            this.createConfettiEffect();
+        }
     }
     
     private createConfettiEffect(): void {
