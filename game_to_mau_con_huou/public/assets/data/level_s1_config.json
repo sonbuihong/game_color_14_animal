@@ -19,7 +19,7 @@
     "outlineKey": "template",
     "frameKey": "frame",
     "baseX_pct": 0.11,
-    "baseY_pct": 0.28,
+    "baseY_pct": 0.27,
     "parts": []
   },
   "name": {
@@ -27,7 +27,7 @@
     "outlineKey": "name",
     "frameKey": "name_bg",
     "baseX_pct": 0.1045,
-    "baseY_pct": 0.44,
+    "baseY_pct": 0.41,
     "parts": []
   }
 }
