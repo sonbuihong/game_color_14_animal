@@ -9,8 +9,8 @@ export const GameConstants = {
     // CẤU HÌNH CHUNG (SYSTEM)
     // =========================================
     PALETTE_DATA: [
-        { key: TextureKeys.BtnS1_1, color: 0xF6BD73 },
-        { key: TextureKeys.BtnS1_2, color: 0xD8786C }, 
+        { key: TextureKeys.BtnS1_1, color: 0xD8786C },
+        { key: TextureKeys.BtnS1_2, color: 0xF6BD73 }, 
         { key: TextureKeys.BtnS1_3, color: 0xCE9158 },
         { key: TextureKeys.BtnS1_4, color: 0x487ED2 }, 
         { key: TextureKeys.BtnS1_5, color: 0x1D8698 },    
