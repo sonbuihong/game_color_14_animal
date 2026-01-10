@@ -289,6 +289,7 @@ export default class Scene1 extends Phaser.Scene {
         // Chỉ hiện outline (hình ảnh chính)
         if (config.outlineKey) {
             this.add.image(cx, cy, config.outlineKey)
+                .setOrigin(0.5, 0.6)
                 .setScale(config.baseScale)
                 .setDepth(100);
         }
