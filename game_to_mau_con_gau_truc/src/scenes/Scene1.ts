@@ -117,6 +117,7 @@ export default class Scene1 extends Phaser.Scene {
         if (
             !this.paintManager.isPainting() &&
             !this.isIntroActive &&
+            !this.activeHintTween &&
             this.finishedParts.size < this.totalParts
         ) {
             this.idleManager.update(delta);
@@ -289,6 +290,7 @@ export default class Scene1 extends Phaser.Scene {
         // Chỉ hiện outline (hình ảnh chính)
         if (config.outlineKey) {
             this.add.image(cx, cy, config.outlineKey)
+                .setOrigin(0.5,0.6)
                 .setScale(config.baseScale)
                 .setDepth(100);
         }
@@ -593,6 +595,10 @@ export default class Scene1 extends Phaser.Scene {
         const IDLE_CFG = GameConstants.IDLE;
 
         // Visual 1: Nhấp nháy bộ phận đó
+        const hintPoints = target?.getData('hintPoints');
+        const pointCount = (hintPoints && hintPoints.length > 0) ? hintPoints.length : 1;
+        const blinkRepeats = pointCount * 2;
+
         this.activeHintTarget = target;
         this.activeHintTween = this.tweens.add({
             targets: target, 
@@ -600,7 +606,7 @@ export default class Scene1 extends Phaser.Scene {
             scale: { from: target.getData('originScale'), to: target.getData('originScale') * 1.005 },
             duration: IDLE_CFG.FADE_IN, 
             yoyo: true, 
-            repeat: 2,
+            repeat: blinkRepeats,
             onComplete: () => { 
                 this.activeHintTween = null; 
                 this.activeHintTarget = null;
@@ -628,7 +634,7 @@ export default class Scene1 extends Phaser.Scene {
         // Set vị trí ban đầu (nếu có hint points thì set ở điểm đầu, ko thì destX)
         // Tuy nhiên logic hint là fade in tại chỗ, nên cần xác định chỗ nào
         
-        const hintPoints = target?.getData('hintPoints'); // Lấy danh sách điểm gợi ý
+        // const hintPoints = target?.getData('hintPoints'); // Lấy danh sách điểm gợi ý (Đã khai báo ở trên)
         
         // Mặc định dùng destX, destY cũ làm điểm xuất phát
         let startHintX = destX;

@@ -38,7 +38,7 @@ export default class UIScene extends Phaser.Scene {
         let textBannerKey = TextureKeys.S1_BannerText;
         // Hiển thị Banner và Text
         this.bannerImage = this.add.image(cx, bannerY, bannerKey).setScale(0.7).setOrigin(0.5, -0.1);
-        this.bannerText = this.add.image(cx, bannerY, textBannerKey).setScale(0.9).setOrigin(0.5, -0.9);
+        this.bannerText = this.add.image(cx, bannerY, textBannerKey).setScale(0.9).setOrigin(0.5, -0.7);
         
         // Tạo bàn tay gợi ý (ẩn đi, set depth cao nhất để đè lên mọi thứ)
         this.handHint = this.add
