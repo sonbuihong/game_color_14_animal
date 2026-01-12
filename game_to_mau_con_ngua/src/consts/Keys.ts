@@ -31,8 +31,6 @@ export enum TextureKeys {
     S1_Outline = 'outline',
 
     S1_1 = '1',
-    S1_2 = '2',
-    S1_3 = '3',
 
     // Các nút màu Scene 1 (Formerly S2 Colors)
     BtnS1_1 = 's1_btn_1',

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { hideGameButtons, showGameButtons } from '../main'; 
+import { hideGameButtons, showGameButtons, sdk, game } from '../main'; 
 import AudioManager from '../audio/AudioManager';
 import { changeBackground } from '../utils/BackgroundManager';
 import { resetVoiceState } from '../utils/rotateOrientation';
@@ -86,7 +86,9 @@ export default class EndGameScene extends Phaser.Scene {
                 AudioManager.play('sfx-click');
                 this.stopConfetti(); //
                 showGameButtons();
-                this.scene.start('PreloadScene');
+                // SDK: Reset attempt
+                game.retryFromStart();
+                this.scene.start('Scene1', { isRestart: true });
             });
 
             // 4. Nút Exit
@@ -104,26 +106,20 @@ export default class EndGameScene extends Phaser.Scene {
                 this.scene.start('MenuScene');
 
                 // ✅ Gửi COMPLETE cho Game Hub
-                const host = (window as any).irukaHost;
                 const state = (window as any).irukaGameState || {};
+                const timeMs = state.startTime ? Date.now() - state.startTime : 0;
+                
+                game.finalizeAttempt(); 
+                const extraData = game.prepareSubmitData();
 
-                if (host && typeof host.complete === 'function') {
-                    const timeMs = state.startTime
-                        ? Date.now() - state.startTime
-                        : 0;
-                    const score = state.currentScore || 0;
-
-                    host.complete({
-                        score,
-                        timeMs,
-                        extras: {
-                            reason: 'user_exit', // cho hub biết là user tự thoát
-                        },
-                    });
-                } else {
-                    // Fallback: nếu chạy ngoài Game Hub (dev standalone)
-                    this.scene.start('LessonSelectScene');
-                }
+                sdk.complete({
+                    score: state.currentScore || 0,
+                    timeMs: timeMs,
+                    extras: {
+                        reason: 'user_exit',
+                       ...extraData
+                    },
+                });
             });
 
 

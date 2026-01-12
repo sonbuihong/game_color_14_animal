@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { hideGameButtons, showGameButtons } from '../main'; 
+import { hideGameButtons, showGameButtons, sdk } from '../main'; 
+import { game } from "@iruka-edu/mini-game-sdk"; 
 import AudioManager from '../audio/AudioManager';
 import { changeBackground } from '../utils/BackgroundManager';
 import { resetVoiceState } from '../utils/rotateOrientation';
@@ -85,6 +86,7 @@ export default class EndGameScene extends Phaser.Scene {
             AudioManager.stopAll();
             AudioManager.play('sfx-click');
             this.stopConfetti(); //
+            game.retryFromStart();
             showGameButtons();
             this.scene.start('PreloadScene');
         });
@@ -104,26 +106,11 @@ export default class EndGameScene extends Phaser.Scene {
             this.scene.start('MenuScene');
 
             // ✅ Gửi COMPLETE cho Game Hub
-            const host = (window as any).irukaHost;
-            const state = (window as any).irukaGameState || {};
-
-            if (host && typeof host.complete === 'function') {
-                const timeMs = state.startTime
-                    ? Date.now() - state.startTime
-                    : 0;
-                const score = state.currentScore || 0;
-
-                host.complete({
-                    score,
-                    timeMs,
-                    extras: {
-                        reason: 'user_exit', // cho hub biết là user tự thoát
-                    },
+            sdk.complete({
+                  timeMs: Date.now() - ((window as any).irukaGameState?.startTime ?? Date.now()),
+                  extras: { reason: "user_exit", stats: game.prepareSubmitData() },
                 });
-            } else {
-                // Fallback: nếu chạy ngoài Game Hub (dev standalone)
-                this.scene.start('LessonSelectScene');
-            }
+                
         });
 
 

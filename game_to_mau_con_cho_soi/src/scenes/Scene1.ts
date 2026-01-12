@@ -14,7 +14,7 @@ import {
     resetVoiceState,
 } from '../utils/rotateOrientation';
 import AudioManager from '../audio/AudioManager';
-import { showGameButtons } from '../main';
+import { showGameButtons, game, sdk } from '../main';
 
 import FPSCounter from '../utils/FPSCounter';
 
@@ -63,13 +63,14 @@ export default class Scene1 extends Phaser.Scene {
 
         if (data?.isRestart) {
             this.isWaitingForIntroStart = false;
+            game.retryFromStart();
         } else {
             this.isWaitingForIntroStart = true;
         }
     }
 
     create() {
-        document.title = "Game Tô Màu Con Sói";
+        document.title = "Game Tô Màu Con Chó Sói";
         showGameButtons();
 
         this.setupSystem(); // Cài đặt hệ thống (Paint, Idle)
@@ -81,6 +82,16 @@ export default class Scene1 extends Phaser.Scene {
             paintManager: this.paintManager,
             sceneKey: SceneKeys.Scene1 
         });
+
+        // SDK Integration
+        game.setTotal(this.totalParts);
+        (window as any).irukaGameState = {
+            startTime: Date.now(),
+            currentScore: 0,
+        };
+        sdk.score(0, 0);
+        sdk.progress({ levelIndex: 0, total: 1 });
+        game.startQuestionTimer();
 
         this.createLevel(); // Tạo nhân vật và các vùng tô màu
 
@@ -358,6 +369,18 @@ export default class Scene1 extends Phaser.Scene {
     ) {
         this.finishedParts.add(id);
 
+        game.recordCorrect({ scoreDelta: 1 });
+        (window as any).irukaGameState.currentScore = this.finishedParts.size;
+        sdk.score(this.finishedParts.size, 1);
+        sdk.progress({
+            levelIndex: 0,
+            score: this.finishedParts.size,
+        });
+        game.finishQuestionTimer();
+        if (this.finishedParts.size < this.totalParts) {
+            game.startQuestionTimer();
+        }
+
         // --- LOGIC AUTO-FILL THÔNG MINH ---
         // Nếu bé chỉ dùng ĐÚNG 1 MÀU -> Game tự động fill màu đó cho đẹp (khen thưởng)
         if (usedColors.size === 1) {
@@ -396,9 +419,10 @@ export default class Scene1 extends Phaser.Scene {
                 if (uiScene.hideBanners) uiScene.hideBanners();
             }
 
-            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () =>
-                this.scene.start(SceneKeys.EndGame)
-            );
+            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () => {
+                game.finalizeAttempt();
+                this.scene.start(SceneKeys.EndGame);
+            });
         }
     }
 
@@ -582,6 +606,7 @@ export default class Scene1 extends Phaser.Scene {
      * Gợi ý khi rảnh (Idle Hint): Chọn ngẫu nhiên 1 phần chưa tô để chỉ vào
      */
     private showHint() {
+        game.addHint();
         const items = Array.from(this.unfinishedPartsMap.values());
         if (items.length === 0) return;
         

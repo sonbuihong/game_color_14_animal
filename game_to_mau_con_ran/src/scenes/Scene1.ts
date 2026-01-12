@@ -14,7 +14,8 @@ import {
     resetVoiceState,
 } from '../utils/rotateOrientation';
 import AudioManager from '../audio/AudioManager';
-import { showGameButtons } from '../main';
+import { showGameButtons, sdk } from '../main';
+import { game as gameHub } from "@iruka-edu/mini-game-sdk";
 
 import FPSCounter from '../utils/FPSCounter';
 
@@ -62,6 +63,7 @@ export default class Scene1 extends Phaser.Scene {
         this.totalParts = 0;
 
         if (data?.isRestart) {
+            gameHub.retryFromStart();
             this.isWaitingForIntroStart = false;
         } else {
             this.isWaitingForIntroStart = true;
@@ -107,6 +109,18 @@ export default class Scene1 extends Phaser.Scene {
                 this.playIntroSequence();
             }, 500);
         }
+
+        // SET TOTAL & INIT STATE
+        gameHub.setTotal(this.totalParts);
+        (window as any).irukaGameState = {
+            startTime: Date.now(),
+            currentScore: 0,
+        };
+        sdk.score(0, 0);
+        sdk.progress({ levelIndex: 0, score: 0, total: this.totalParts });
+        
+        // Start Timer
+        gameHub.startQuestionTimer();
     }
 
     update(time: number, delta: number) {
@@ -385,6 +399,27 @@ export default class Scene1 extends Phaser.Scene {
             repeat: 2,
         });
 
+        // --- SDK UPDATE ---
+        gameHub.recordCorrect({ scoreDelta: 1 });
+        gameHub.finishQuestionTimer(); // Finish timer for this part (logic tùy game, nếu mỗi part là 1 question)
+        // Hoặc nếu cả game là 1 question thì chỉ finish khi thắng. 
+        // Theo flow user: "Khi trả lời đúng câu hỏi... finishQuestionTimer".
+        // Với game tô màu, mỗi part coi như 1 sub-task.
+        // Tuy nhiên thường startQuestionTimer lại ngay sau đó nếu còn part.
+        
+        const currentScore = this.finishedParts.size;
+        (window as any).irukaGameState.currentScore = currentScore;
+        sdk.score(currentScore, 1);
+        sdk.progress({
+             levelIndex: 0,
+             score: currentScore,
+             total: this.totalParts
+        });
+
+        if (this.finishedParts.size < this.totalParts) {
+             gameHub.startQuestionTimer(); // Start timer cho part tiếp theo
+        }
+
         // Kiểm tra điều kiện thắng
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
@@ -583,6 +618,7 @@ export default class Scene1 extends Phaser.Scene {
      * Gợi ý khi rảnh (Idle Hint): Chọn ngẫu nhiên 1 phần chưa tô để chỉ vào
      */
     private showHint() {
+        gameHub.addHint();
         const items = Array.from(this.unfinishedPartsMap.values());
         if (items.length === 0) return;
         

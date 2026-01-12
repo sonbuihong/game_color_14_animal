@@ -6,9 +6,7 @@
     "baseY_pct": 0.56,
     "parts": [
       { "key": "1", "offsetX": 0, "offsetY": 0, "scale": 0.73, 
-        "hintPoints": [{"x": 150, "y": -300}]},
-      { "key": "2", "offsetX": 0, "offsetY": 0, "scale": 0.73,
-        "hintPoints": [{"x": 340, "y": -430}]}
+        "hintPoints": [{"x": 150, "y": -300}]}
     ]
   },
   "letter": {

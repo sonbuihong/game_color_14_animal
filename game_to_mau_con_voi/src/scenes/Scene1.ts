@@ -14,7 +14,8 @@ import {
     resetVoiceState,
 } from '../utils/rotateOrientation';
 import AudioManager from '../audio/AudioManager';
-import { showGameButtons } from '../main';
+import { showGameButtons, sdk } from '../main';
+import { game } from "@iruka-edu/mini-game-sdk";
 
 import FPSCounter from '../utils/FPSCounter';
 
@@ -33,12 +34,12 @@ export default class Scene1 extends Phaser.Scene {
         new Map();
     // Set lưu ID các bộ phận đã hoàn thành -> Dùng để check thắng (Win condition)
     private finishedParts: Set<string> = new Set();
-    private totalParts: number = 0; // Tổng số bộ phận cần tô
+    private totalParts: number = 2; // Tổng số bộ phận cần tô (Set cứng là 2 theo config)
+    private score: number = 0; // Điểm số hiện tại
     private isIntroActive: boolean = false; // Cờ chặn tương tác khi đang chạy intro
     private isWaitingForIntroStart: boolean = true; // Cờ chờ người dùng chạm lần đầu
 
     // --- UI COMPONENTS ---
-    
     private get handHint(): Phaser.GameObjects.Image | undefined {
          const uiScene = this.scene.get(SceneKeys.UI) as any;
          return uiScene?.handHint;
@@ -107,6 +108,16 @@ export default class Scene1 extends Phaser.Scene {
                 this.playIntroSequence();
             }, 500);
         }
+
+        // --- GAME HUB TRACKING INIT ---
+        game.setTotal(2);
+        (window as any).irukaGameState = {
+            startTime: Date.now(),
+            currentScore: 0,
+        };
+        sdk.score(this.score, 0);
+        sdk.progress({ levelIndex: 0, total: 1 }); // Chỉ có 1 level
+        game.startQuestionTimer();
     }
 
     update(time: number, delta: number) {
@@ -384,9 +395,33 @@ export default class Scene1 extends Phaser.Scene {
             repeat: 2,
         });
 
+        // --- GAME HUB TRACKING UPDATE ---
+        game.finishQuestionTimer();
+        game.recordCorrect({ scoreDelta: 1 });
+        this.score += 1; 
+        (window as any).irukaGameState.currentScore = this.score;
+        sdk.score(this.score, 1);
+        sdk.progress({
+             levelIndex: 0,
+             score: this.score,
+        });
+
         // Kiểm tra điều kiện thắng
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
+            
+             // --- GAME HUB COMPLETE ---
+             game.finalizeAttempt();
+             sdk.requestSave({
+                score: this.score,
+                 levelIndex: 0,
+             });
+             sdk.progress({
+                 levelIndex: 0,
+                 total: 1,
+                score: this.score,
+             });
+
             AudioManager.play('sfx-correct_s2');
             
             // Xóa UI (Nút màu & Banner)
@@ -399,9 +434,12 @@ export default class Scene1 extends Phaser.Scene {
             this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () =>
                 this.scene.start(SceneKeys.EndGame)
             );
+        } else {
+             // Chưa thắng -> Tiếp tục câu hỏi/part mới
+             game.startQuestionTimer();
         }
     }
-
+    
     // =================================================================
     // PHẦN 4: HƯỚNG DẪN & GỢI Ý (TUTORIAL & HINT)
     // =================================================================
@@ -589,6 +627,7 @@ export default class Scene1 extends Phaser.Scene {
         const target = items[Math.floor(Math.random() * items.length)];
 
         AudioManager.play('hint');
+        game.addHint(); // Track hint
         
         const IDLE_CFG = GameConstants.IDLE;
 

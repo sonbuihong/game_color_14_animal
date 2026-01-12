@@ -14,7 +14,8 @@ import {
     resetVoiceState,
 } from '../utils/rotateOrientation';
 import AudioManager from '../audio/AudioManager';
-import { showGameButtons } from '../main';
+import { showGameButtons, sdk } from '../main'; // Updated import
+import { game } from "@iruka-edu/mini-game-sdk";
 
 import FPSCounter from '../utils/FPSCounter';
 
@@ -107,6 +108,15 @@ export default class Scene1 extends Phaser.Scene {
                 this.playIntroSequence();
             }, 500);
         }
+
+        // --- GAME HUB TRACKING INIT ---
+        game.setTotal(this.totalParts); 
+        (window as any).irukaGameState = {
+            startTime: Date.now(),
+            currentScore: 0,
+        };
+        sdk.progress({ levelIndex: 0, total: 1 });
+        game.startQuestionTimer();
     }
 
     update(time: number, delta: number) {
@@ -384,9 +394,35 @@ export default class Scene1 extends Phaser.Scene {
             repeat: 2,
         });
 
+        // --- GAME HUB TRACKING UPDATE ---
+        game.finishQuestionTimer();
+        game.recordCorrect({ scoreDelta: 1 });
+        
+        (window as any).irukaGameState.currentScore += 1;
+        const currentScore = (window as any).irukaGameState.currentScore;
+
+        sdk.score(currentScore, 1);
+        sdk.progress({
+             levelIndex: 0,
+             score: currentScore,
+        });
+
         // Kiểm tra điều kiện thắng
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
+            
+             // --- GAME HUB COMPLETE ---
+             game.finalizeAttempt();
+             sdk.requestSave({
+                 score: currentScore,
+                 levelIndex: 0,
+             });
+             sdk.progress({
+                 levelIndex: 0,
+                 total: 1,
+                 score: currentScore,
+             });
+
             AudioManager.play('sfx-correct_s2');
             
             // Xóa UI (Nút màu & Banner)
@@ -399,6 +435,8 @@ export default class Scene1 extends Phaser.Scene {
             this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () =>
                 this.scene.start(SceneKeys.EndGame)
             );
+        } else {
+             game.startQuestionTimer();
         }
     }
 
@@ -589,6 +627,7 @@ export default class Scene1 extends Phaser.Scene {
         const target = items[Math.floor(Math.random() * items.length)];
 
         AudioManager.play('hint');
+        game.addHint(); // Track hint
         
         const IDLE_CFG = GameConstants.IDLE;
 
