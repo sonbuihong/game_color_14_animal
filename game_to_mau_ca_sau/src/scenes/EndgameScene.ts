@@ -29,6 +29,7 @@ export default class EndGameScene extends Phaser.Scene {
         const w = this.scale.width; 
         const h = this.scale.height;
         AudioManager.loadAll();
+        this.sound.stopAll();
         AudioManager.play('complete');
 
         this.time.delayedCall(2000, () => {

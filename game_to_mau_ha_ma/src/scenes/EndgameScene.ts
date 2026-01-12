@@ -29,13 +29,14 @@ export default class EndGameScene extends Phaser.Scene {
         const w = this.scale.width; 
         const h = this.scale.height;
         AudioManager.loadAll();
+
+        this.sound.stopAll();
         AudioManager.play('complete');
 
         this.time.delayedCall(2000, () => {
             AudioManager.play('fireworks');
             AudioManager.play('applause');
         });
-        
 
         // Banner
         this.add
@@ -85,9 +86,9 @@ export default class EndGameScene extends Phaser.Scene {
             this.sound.stopAll();
             AudioManager.stopAll();
             AudioManager.play('sfx-click');
-            this.stopConfetti(); //
-            game.retryFromStart();
+            this.stopConfetti();
             showGameButtons();
+            game.retryFromStart();
             this.scene.start('PreloadScene');
         });
 
@@ -102,7 +103,7 @@ export default class EndGameScene extends Phaser.Scene {
         exitBtn.on('pointerdown', () => {
             AudioManager.play('sfx-click');
             AudioManager.stopAll();
-            this.stopConfetti(); //
+            this.stopConfetti();
             this.scene.start('MenuScene');
 
             // ✅ Gửi COMPLETE cho Game Hub
@@ -110,10 +111,10 @@ export default class EndGameScene extends Phaser.Scene {
                   timeMs: Date.now() - ((window as any).irukaGameState?.startTime ?? Date.now()),
                   extras: { reason: "user_exit", stats: game.prepareSubmitData() },
                 });
-                
+
+                // Fallback exit logic if needed (e.g. if SDK doesn't handle navigation)
+                console.log("SDK Complete sent");
         });
-
-
 
         // === optional: hover effect ===
         [replayBtn, exitBtn].forEach((btn) => {

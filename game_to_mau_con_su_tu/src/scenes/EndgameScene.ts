@@ -99,7 +99,7 @@ export default class EndGameScene extends Phaser.Scene {
                 AudioManager.play('sfx-click');
                 AudioManager.stopAll();
                 this.stopConfetti();
-                
+                this.scene.start('MenuScene');
                 // SDK: Gửi complete
                 const state = (window as any).irukaGameState || {};
                 const timeMs = state.startTime ? Date.now() - state.startTime : 0;
