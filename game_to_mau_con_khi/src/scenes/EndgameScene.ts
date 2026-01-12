@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { hideGameButtons, showGameButtons, sdk, game } from '../main';
+import { hideGameButtons, showGameButtons, sdk } from '../main';
+import { game } from "@iruka-edu/mini-game-sdk";
 import AudioManager from '../audio/AudioManager';
 import { resetVoiceState } from '../utils/rotateOrientation';
 
@@ -107,11 +108,8 @@ export default class EndGameScene extends Phaser.Scene {
                 const extraData = game.prepareSubmitData();
 
                 sdk.complete({
-                    score: state.currentScore || 0,
-                    timeMs: timeMs,
-                    extras: {
-                       ...extraData
-                    },
+                    timeMs: Date.now() - ((window as any).irukaGameState?.startTime ?? Date.now()),
+                    extras: { reason: "user_exit", stats: game.prepareSubmitData() },
                 });
 
                 // Fallback exit logic if needed (e.g. if SDK doesn't handle navigation)

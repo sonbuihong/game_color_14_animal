@@ -1,25 +1,19 @@
 import Phaser from 'phaser';
-import { hideGameButtons, showGameButtons } from '../main'; 
+import { hideGameButtons, showGameButtons, sdk } from '../main';
+import { game } from "@iruka-edu/mini-game-sdk";
 import AudioManager from '../audio/AudioManager';
-import { changeBackground } from '../utils/BackgroundManager';
 import { resetVoiceState } from '../utils/rotateOrientation';
 
 export default class EndGameScene extends Phaser.Scene {
     private containerEl: HTMLElement | null = null;
     private confettiEvent?: Phaser.Time.TimerEvent;
-    StopAllSounds: any;
 
     constructor() { super('EndGameScene'); }
 
-    
-
     preload() {
         this.load.image('icon', 'assets/images/ui/icon_end.png');
-        
         this.load.image('banner_congrat', 'assets/images/bg/banner_congrat.png');
-
         this.load.image('btn_reset', 'assets/images/ui/btn_reset.png'); 
-
         this.load.image('btn_exit', 'assets/images/ui/btn_exit.png');
     }
 
@@ -28,6 +22,9 @@ export default class EndGameScene extends Phaser.Scene {
         const w = this.scale.width; 
         const h = this.scale.height;
         AudioManager.loadAll();
+        // Stop scene 1 music if playing
+        this.sound.stopAll();
+        
         AudioManager.play('complete');
 
         this.time.delayedCall(2000, () => {
@@ -35,7 +32,6 @@ export default class EndGameScene extends Phaser.Scene {
             AudioManager.play('applause');
         });
         
-
         // Banner
         this.add
             .image(w/2, h/2 - h * 0.12, 'banner_congrat')
@@ -84,9 +80,11 @@ export default class EndGameScene extends Phaser.Scene {
                 this.sound.stopAll();
                 AudioManager.stopAll();
                 AudioManager.play('sfx-click');
-                this.stopConfetti(); //
+                this.stopConfetti(); 
                 showGameButtons();
-                this.scene.start('PreloadScene');
+                // SDK: Reset attempt
+                game.retryFromStart();
+                this.scene.start('Scene1', { isRestart: true });
             });
 
             // 4. Nút Exit
@@ -100,33 +98,23 @@ export default class EndGameScene extends Phaser.Scene {
             exitBtn.on('pointerdown', () => {
                 AudioManager.play('sfx-click');
                 AudioManager.stopAll();
-                this.stopConfetti(); //
-                this.scene.start('MenuScene');
-
-                // ✅ Gửi COMPLETE cho Game Hub
-                const host = (window as any).irukaHost;
+                this.stopConfetti();
+                
+                // SDK: Gửi complete
                 const state = (window as any).irukaGameState || {};
+                const timeMs = state.startTime ? Date.now() - state.startTime : 0;
+                
+                game.finalizeAttempt(); // Finalize attempt before exiting
+                const extraData = game.prepareSubmitData();
 
-                if (host && typeof host.complete === 'function') {
-                    const timeMs = state.startTime
-                        ? Date.now() - state.startTime
-                        : 0;
-                    const score = state.currentScore || 0;
+                sdk.complete({
+                    timeMs: Date.now() - ((window as any).irukaGameState?.startTime ?? Date.now()),
+                    extras: { reason: "user_exit", stats: game.prepareSubmitData() },
+                });
 
-                    host.complete({
-                        score,
-                        timeMs,
-                        extras: {
-                            reason: 'user_exit', // cho hub biết là user tự thoát
-                        },
-                    });
-                } else {
-                    // Fallback: nếu chạy ngoài Game Hub (dev standalone)
-                    this.scene.start('LessonSelectScene');
-                }
+                // Fallback exit logic if needed (e.g. if SDK doesn't handle navigation)
+                console.log("SDK Complete sent");
             });
-
-
 
             // === optional: hover effect ===
             [replayBtn, exitBtn].forEach((btn) => {

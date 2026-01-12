@@ -14,7 +14,8 @@ import {
     resetVoiceState,
 } from '../utils/rotateOrientation';
 import AudioManager from '../audio/AudioManager';
-import { showGameButtons, game, sdk } from '../main';
+import { showGameButtons, sdk } from '../main';
+import { game } from "@iruka-edu/mini-game-sdk";
 
 import FPSCounter from '../utils/FPSCounter';
 
@@ -34,6 +35,7 @@ export default class Scene1 extends Phaser.Scene {
     // Set lưu ID các bộ phận đã hoàn thành -> Dùng để check thắng (Win condition)
     private finishedParts: Set<string> = new Set();
     private totalParts: number = 0; // Tổng số bộ phận cần tô
+    private score: number = 0; // Điểm số hiện tại
     private isIntroActive: boolean = false; // Cờ chặn tương tác khi đang chạy intro
     private isWaitingForIntroStart: boolean = true; // Cờ chờ người dùng chạm lần đầu
 
@@ -60,6 +62,7 @@ export default class Scene1 extends Phaser.Scene {
         this.unfinishedPartsMap.clear();
         this.finishedParts.clear();
         this.totalParts = 0;
+        this.score = 0;
 
         if (data?.isRestart) {
             this.isWaitingForIntroStart = false;
@@ -83,17 +86,17 @@ export default class Scene1 extends Phaser.Scene {
             sceneKey: SceneKeys.Scene1 
         });
 
+        this.createLevel(); // Tạo nhân vật và các vùng tô màu
+        
         // SDK Integration
-        game.setTotal(this.totalParts);
+        game.setTotal(1);
         (window as any).irukaGameState = {
             startTime: Date.now(),
             currentScore: 0,
         };
-        sdk.score(0, 0);
+        sdk.score(this.score, 0);
         sdk.progress({ levelIndex: 0, total: 1 });
         game.startQuestionTimer();
-
-        this.createLevel(); // Tạo nhân vật và các vùng tô màu
 
         this.setupInput(); // Cài đặt sự kiện chạm/vuốt
 
@@ -281,7 +284,7 @@ export default class Scene1 extends Phaser.Scene {
         // Chỉ hiện outline
         this.add.image(cx, cy, config.outlineKey)
             .setOrigin(0.56, 0.5)
-            .setScale(config.baseScale).setDepth(100);
+            .setScale(config.baseScale * 1.3).setDepth(100);
     }
 
     private createDecorativeObject(config: any) {
@@ -370,11 +373,12 @@ export default class Scene1 extends Phaser.Scene {
         this.finishedParts.add(id);
 
         game.recordCorrect({ scoreDelta: 1 });
-        (window as any).irukaGameState.currentScore = this.finishedParts.size;
-        sdk.score(this.finishedParts.size, 1);
+        this.score += 1;
+        (window as any).irukaGameState.currentScore = this.score;
+        sdk.score(this.score, 1);
         sdk.progress({
             levelIndex: 0,
-            score: this.finishedParts.size,
+            score: this.score,
         });
         game.finishQuestionTimer();
         if (this.finishedParts.size < this.totalParts) {
@@ -410,6 +414,19 @@ export default class Scene1 extends Phaser.Scene {
         // Kiểm tra điều kiện thắng
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
+
+            // --- GAME HUB COMPLETE ---
+            game.finalizeAttempt();
+            sdk.requestSave({
+                score: this.score,
+                levelIndex: 0,
+            });
+            sdk.progress({
+                levelIndex: 0, // Level complete -> set index + 1 if multi-level, here just complete
+                total: 1,
+                score: this.score,
+            });
+
             AudioManager.play('sfx-correct_s2');
             
             // Xóa UI (Nút màu & Banner)
@@ -420,7 +437,6 @@ export default class Scene1 extends Phaser.Scene {
             }
 
             this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () => {
-                game.finalizeAttempt();
                 this.scene.start(SceneKeys.EndGame);
             });
         }

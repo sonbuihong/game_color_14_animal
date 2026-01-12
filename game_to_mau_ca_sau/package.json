@@ -19,6 +19,7 @@
     "dev": "vite",
     "build": "vite build",
     "setup": "pnpm dlx dotenv-cli -- pnpm add @iruka-edu/game-core @iruka-edu/mini-game-sdk",
+    "iruka-game:validate": "pnpm dlx dotenv-cli -e .env -- iruka-game validate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

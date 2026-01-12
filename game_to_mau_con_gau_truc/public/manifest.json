@@ -1,0 +1,21 @@
+{
+  "id": "game_to_mau_con_gau_truc",
+  "name": "Game Tô Màu Con Gấu Trúc",
+  "short_name": "Tô Màu Gấu Trúc",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+     {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

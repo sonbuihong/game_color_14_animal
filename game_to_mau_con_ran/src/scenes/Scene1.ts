@@ -15,7 +15,7 @@ import {
 } from '../utils/rotateOrientation';
 import AudioManager from '../audio/AudioManager';
 import { showGameButtons, sdk } from '../main';
-import { game as gameHub } from "@iruka-edu/mini-game-sdk";
+import { game } from "@iruka-edu/mini-game-sdk";
 
 import FPSCounter from '../utils/FPSCounter';
 
@@ -33,8 +33,10 @@ export default class Scene1 extends Phaser.Scene {
     private unfinishedPartsMap: Map<string, Phaser.GameObjects.Image> =
         new Map();
     // Set lưu ID các bộ phận đã hoàn thành -> Dùng để check thắng (Win condition)
+    // Set lưu ID các bộ phận đã hoàn thành -> Dùng để check thắng (Win condition)
     private finishedParts: Set<string> = new Set();
     private totalParts: number = 0; // Tổng số bộ phận cần tô
+    private score: number = 0; // Điểm số hiện tại
     private isIntroActive: boolean = false; // Cờ chặn tương tác khi đang chạy intro
     private isWaitingForIntroStart: boolean = true; // Cờ chờ người dùng chạm lần đầu
 
@@ -61,9 +63,10 @@ export default class Scene1 extends Phaser.Scene {
         this.unfinishedPartsMap.clear();
         this.finishedParts.clear();
         this.totalParts = 0;
+        this.score = 0;
 
         if (data?.isRestart) {
-            gameHub.retryFromStart();
+            game.retryFromStart();
             this.isWaitingForIntroStart = false;
         } else {
             this.isWaitingForIntroStart = true;
@@ -83,8 +86,6 @@ export default class Scene1 extends Phaser.Scene {
             paintManager: this.paintManager,
             sceneKey: SceneKeys.Scene1 
         });
-
-        this.createLevel(); // Tạo nhân vật và các vùng tô màu
 
         this.setupInput(); // Cài đặt sự kiện chạm/vuốt
 
@@ -110,17 +111,17 @@ export default class Scene1 extends Phaser.Scene {
             }, 500);
         }
 
-        // SET TOTAL & INIT STATE
-        gameHub.setTotal(this.totalParts);
+        this.createLevel(); // Tạo nhân vật và các vùng tô màu
+
+        // SDK Integration
+        game.setTotal(this.totalParts);
         (window as any).irukaGameState = {
             startTime: Date.now(),
             currentScore: 0,
         };
-        sdk.score(0, 0);
-        sdk.progress({ levelIndex: 0, score: 0, total: this.totalParts });
-        
-        // Start Timer
-        gameHub.startQuestionTimer();
+        sdk.score(this.score, 0);
+        sdk.progress({ levelIndex: 0, total: 1 });
+        game.startQuestionTimer();
     }
 
     update(time: number, delta: number) {
@@ -400,29 +401,35 @@ export default class Scene1 extends Phaser.Scene {
         });
 
         // --- SDK UPDATE ---
-        gameHub.recordCorrect({ scoreDelta: 1 });
-        gameHub.finishQuestionTimer(); // Finish timer for this part (logic tùy game, nếu mỗi part là 1 question)
-        // Hoặc nếu cả game là 1 question thì chỉ finish khi thắng. 
-        // Theo flow user: "Khi trả lời đúng câu hỏi... finishQuestionTimer".
-        // Với game tô màu, mỗi part coi như 1 sub-task.
-        // Tuy nhiên thường startQuestionTimer lại ngay sau đó nếu còn part.
-        
-        const currentScore = this.finishedParts.size;
-        (window as any).irukaGameState.currentScore = currentScore;
-        sdk.score(currentScore, 1);
+        game.recordCorrect({ scoreDelta: 1 });
+        this.score += 1;
+        (window as any).irukaGameState.currentScore = this.score;
+        sdk.score(this.score, 1);
         sdk.progress({
-             levelIndex: 0,
-             score: currentScore,
-             total: this.totalParts
+            levelIndex: 0,
+            score: this.score,
         });
-
+        game.finishQuestionTimer();
         if (this.finishedParts.size < this.totalParts) {
-             gameHub.startQuestionTimer(); // Start timer cho part tiếp theo
+            game.startQuestionTimer();
         }
 
         // Kiểm tra điều kiện thắng
         if (this.finishedParts.size >= this.totalParts) {
             console.log('WIN!');
+            
+             // --- GAME HUB COMPLETE ---
+             game.finalizeAttempt();
+             sdk.requestSave({
+                 score: this.score,
+                 levelIndex: 0,
+             });
+             sdk.progress({
+                 levelIndex: 0, // Level complete -> set index + 1 if multi-level, here just complete
+                 total: 1,
+                 score: this.score,
+             });
+
             AudioManager.play('sfx-correct_s2');
             
             // Xóa UI (Nút màu & Banner)
@@ -432,9 +439,9 @@ export default class Scene1 extends Phaser.Scene {
                 if (uiScene.hideBanners) uiScene.hideBanners();
             }
 
-            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () =>
-                this.scene.start(SceneKeys.EndGame)
-            );
+            this.time.delayedCall(GameConstants.SCENE1.TIMING.WIN_DELAY, () => {
+                this.scene.start(SceneKeys.EndGame);
+            });
         }
     }
 
@@ -618,7 +625,7 @@ export default class Scene1 extends Phaser.Scene {
      * Gợi ý khi rảnh (Idle Hint): Chọn ngẫu nhiên 1 phần chưa tô để chỉ vào
      */
     private showHint() {
-        gameHub.addHint();
+        game.addHint();
         const items = Array.from(this.unfinishedPartsMap.values());
         if (items.length === 0) return;
         
