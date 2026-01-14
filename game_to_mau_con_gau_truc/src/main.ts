@@ -6,7 +6,7 @@ import UIScene from './scenes/UIScene';
 import EndGameScene from './scenes/EndgameScene';
 import { initRotateOrientation } from './utils/rotateOrientation';
 import AudioManager from './audio/AudioManager';
-import { game } from "@iruka-edu/mini-game-sdk";
+// import { game } from "@iruka-edu/mini-game-sdk";
 
     declare global {
         interface Window {
@@ -76,7 +76,7 @@ import { game } from "@iruka-edu/mini-game-sdk";
             resetBtn.onclick = () => {
                 console.log('Restart button clicked. Stopping all audio and restarting scene.');
 
-                game.retryFromStart(); // Track restart
+                // game.retryFromStart(); // Track restart
 
                 //game.sound.stopAll();
                 gamePhaser.sound.stopByKey('bgm-nen');
@@ -115,7 +115,8 @@ import { game } from "@iruka-edu/mini-game-sdk";
     });
 
     // --- GAME HUB SDK INTEGRATION ---
-
+    // All SDK integration code commented out
+    /*
     function applyResize(width: number, height: number) {
         const gameDiv = document.getElementById('game-container');
         if (gameDiv) {
@@ -201,3 +202,4 @@ import { game } from "@iruka-edu/mini-game-sdk";
         });
       },
     });
+    */
