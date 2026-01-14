@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { hideGameButtons, showGameButtons, sdk } from '../main';
-import { game } from "@iruka-edu/mini-game-sdk";
+// import { game } from "@iruka-edu/mini-game-sdk";
 import AudioManager from '../audio/AudioManager';
 import { changeBackground } from '../utils/BackgroundManager';
 import { resetVoiceState } from '../utils/rotateOrientation';
@@ -89,7 +89,7 @@ export default class EndGameScene extends Phaser.Scene {
                 this.stopConfetti(); //
                 showGameButtons();
                 // SDK: Reset attempt
-                game.retryFromStart();
+                // game.retryFromStart();
                 this.scene.start('Scene1', { isRestart: true });
             });
 
@@ -108,16 +108,16 @@ export default class EndGameScene extends Phaser.Scene {
                 this.scene.start('MenuScene');
 
                 // ✅ Gửi COMPLETE cho Game Hub
-                const state = (window as any).irukaGameState || {};
-                const timeMs = state.startTime ? Date.now() - state.startTime : 0;
-                
-                game.finalizeAttempt(); 
-                const extraData = game.prepareSubmitData();
-
-                sdk.complete({
-                    timeMs: Date.now() - ((window as any).irukaGameState?.startTime ?? Date.now()),
-                    extras: { reason: "user_exit", stats: game.prepareSubmitData() },
-                });
+                // const state = (window as any).irukaGameState || {};
+                // const timeMs = state.startTime ? Date.now() - state.startTime : 0;
+                // 
+                // game.finalizeAttempt(); 
+                // const extraData = game.prepareSubmitData();
+                //
+                // sdk.complete({
+                //     timeMs: Date.now() - ((window as any).irukaGameState?.startTime ?? Date.now()),
+                //     extras: { reason: "user_exit", stats: game.prepareSubmitData() },
+                // });
             });
 
             // === optional: hover effect ===
